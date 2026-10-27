@@ -1,0 +1,349 @@
+# Global Sanctuary — hand-curated starter set of well-known places of worship.
+#
+# Used as the Phase 1 sample dataset when the Wikidata script can't be run.
+# Coordinates are approximate (typically within ~100 m) and should be replaced
+# by `npm run data:fetch` (Wikidata) when you have internet access.
+#
+# Columns (pipe-separated):
+# name | faith | tradition | city | country | lat | lon | unesco (1/0) | english wikipedia title
+#
+# faith keys: christianity, islam, judaism, hinduism, buddhism, sikhism, shinto,
+#             jainism, bahai, chinese, zoroastrianism, other
+#
+# ---------- Christianity: Europe ----------
+St. Peter's Basilica|christianity|Catholic|Vatican City|Vatican City|41.9022|12.4539|1|St. Peter's Basilica
+Archbasilica of St. John Lateran|christianity|Catholic|Rome|Italy|41.8859|12.5057|1|Archbasilica of Saint John Lateran
+Santa Maria Maggiore|christianity|Catholic|Rome|Italy|41.8976|12.4984|1|Santa Maria Maggiore
+Pantheon (Santa Maria ad Martyres)|christianity|Catholic|Rome|Italy|41.8986|12.4769|1|Pantheon, Rome
+Milan Cathedral|christianity|Catholic|Milan|Italy|45.4642|9.1916|0|Milan Cathedral
+Florence Cathedral|christianity|Catholic|Florence|Italy|43.7731|11.2560|1|Florence Cathedral
+St Mark's Basilica|christianity|Catholic|Venice|Italy|45.4345|12.3397|1|St Mark's Basilica
+Basilica of Saint Francis of Assisi|christianity|Catholic|Assisi|Italy|43.0750|12.6055|1|Basilica of Saint Francis of Assisi
+Pisa Cathedral|christianity|Catholic|Pisa|Italy|43.7233|10.3955|1|Pisa Cathedral
+Notre-Dame de Paris|christianity|Catholic|Paris|France|48.8530|2.3499|1|Notre-Dame de Paris
+Sacré-Cœur Basilica|christianity|Catholic|Paris|France|48.8867|2.3431|0|Sacré-Cœur, Paris
+Sainte-Chapelle|christianity|Catholic|Paris|France|48.8554|2.3450|1|Sainte-Chapelle
+Chartres Cathedral|christianity|Catholic|Chartres|France|48.4478|1.4875|1|Chartres Cathedral
+Reims Cathedral|christianity|Catholic|Reims|France|49.2536|4.0340|1|Reims Cathedral
+Strasbourg Cathedral|christianity|Catholic|Strasbourg|France|48.5818|7.7509|1|Strasbourg Cathedral
+Mont-Saint-Michel Abbey|christianity|Catholic|Le Mont-Saint-Michel|France|48.6361|-1.5115|1|Mont-Saint-Michel Abbey
+Sanctuary of Our Lady of Lourdes|christianity|Catholic|Lourdes|France|43.0975|-0.0583|0|Sanctuary of Our Lady of Lourdes
+Sagrada Família|christianity|Catholic|Barcelona|Spain|41.4036|2.1744|1|Sagrada Família
+Santiago de Compostela Cathedral|christianity|Catholic|Santiago de Compostela|Spain|42.8806|-8.5446|1|Santiago de Compostela Cathedral
+Seville Cathedral|christianity|Catholic|Seville|Spain|37.3858|-5.9931|1|Seville Cathedral
+Mosque–Cathedral of Córdoba|christianity|Catholic|Córdoba|Spain|37.8789|-4.7794|1|Mosque–Cathedral of Córdoba
+Burgos Cathedral|christianity|Catholic|Burgos|Spain|42.3405|-3.7045|1|Burgos Cathedral
+Toledo Cathedral|christianity|Catholic|Toledo|Spain|39.8570|-4.0234|1|Toledo Cathedral
+Sanctuary of Fátima|christianity|Catholic|Fátima|Portugal|39.6317|-8.6727|0|Sanctuary of Fátima
+Jerónimos Monastery|christianity|Catholic|Lisbon|Portugal|38.6979|-9.2063|1|Jerónimos Monastery
+Westminster Abbey|christianity|Anglican|London|United Kingdom|51.4993|-0.1273|1|Westminster Abbey
+St Paul's Cathedral|christianity|Anglican|London|United Kingdom|51.5138|-0.0984|0|St Paul's Cathedral
+Canterbury Cathedral|christianity|Anglican|Canterbury|United Kingdom|51.2798|1.0828|1|Canterbury Cathedral
+York Minster|christianity|Anglican|York|United Kingdom|53.9623|-1.0819|0|York Minster
+Durham Cathedral|christianity|Anglican|Durham|United Kingdom|54.7735|-1.5762|1|Durham Cathedral
+Salisbury Cathedral|christianity|Anglican|Salisbury|United Kingdom|51.0651|-1.7973|0|Salisbury Cathedral
+St Giles' Cathedral|christianity|Presbyterian (Church of Scotland)|Edinburgh|United Kingdom|55.9495|-3.1908|0|St Giles' Cathedral
+St Patrick's Cathedral, Dublin|christianity|Anglican (Church of Ireland)|Dublin|Ireland|53.3395|-6.2715|0|St Patrick's Cathedral, Dublin
+Cologne Cathedral|christianity|Catholic|Cologne|Germany|50.9413|6.9583|1|Cologne Cathedral
+Aachen Cathedral|christianity|Catholic|Aachen|Germany|50.7745|6.0839|1|Aachen Cathedral
+Speyer Cathedral|christianity|Catholic|Speyer|Germany|49.3171|8.4420|1|Speyer Cathedral
+Berlin Cathedral|christianity|Protestant (Evangelical)|Berlin|Germany|52.5191|13.4010|1|Berlin Cathedral
+Frauenkirche|christianity|Lutheran|Dresden|Germany|51.0519|13.7416|0|Frauenkirche, Dresden
+Ulm Minster|christianity|Lutheran|Ulm|Germany|48.3985|9.9925|0|Ulm Minster
+All Saints' Church (Castle Church)|christianity|Lutheran|Wittenberg|Germany|51.8664|12.6417|1|All Saints' Church, Wittenberg
+St. Stephen's Cathedral|christianity|Catholic|Vienna|Austria|48.2085|16.3731|1|St. Stephen's Cathedral, Vienna
+St. Vitus Cathedral|christianity|Catholic|Prague|Czech Republic|50.0909|14.4005|1|St. Vitus Cathedral
+Sedlec Ossuary|christianity|Catholic|Kutná Hora|Czech Republic|49.9620|15.2882|1|Sedlec Ossuary
+St. Mary's Basilica|christianity|Catholic|Kraków|Poland|50.0617|19.9393|1|St. Mary's Basilica, Kraków
+Jasna Góra Monastery|christianity|Catholic|Częstochowa|Poland|50.8124|19.0972|0|Jasna Góra Monastery
+Matthias Church|christianity|Catholic|Budapest|Hungary|47.5020|19.0343|1|Matthias Church
+St. Stephen's Basilica|christianity|Catholic|Budapest|Hungary|47.5009|19.0539|0|St. Stephen's Basilica
+Esztergom Basilica|christianity|Catholic|Esztergom|Hungary|47.7985|18.7357|0|Esztergom Basilica
+Cathedral of Our Lady|christianity|Catholic|Antwerp|Belgium|51.2203|4.4016|0|Cathedral of Our Lady (Antwerp)
+Oude Kerk|christianity|Protestant|Amsterdam|Netherlands|52.3743|4.8980|0|Oude Kerk, Amsterdam
+Grossmünster|christianity|Reformed|Zurich|Switzerland|47.3700|8.5441|0|Grossmünster
+St. Pierre Cathedral|christianity|Reformed|Geneva|Switzerland|46.2011|6.1485|0|St. Pierre Cathedral
+Nidaros Cathedral|christianity|Lutheran (Church of Norway)|Trondheim|Norway|63.4269|10.3969|0|Nidaros Cathedral
+Urnes Stave Church|christianity|Lutheran (Church of Norway)|Ornes|Norway|61.2981|7.3228|1|Urnes Stave Church
+Hallgrímskirkja|christianity|Lutheran (Church of Iceland)|Reykjavík|Iceland|64.1417|-21.9266|0|Hallgrímskirkja
+Temppeliaukio Church|christianity|Lutheran|Helsinki|Finland|60.1730|24.9253|0|Temppeliaukio Church
+Uppsala Cathedral|christianity|Lutheran (Church of Sweden)|Uppsala|Sweden|59.8581|17.6339|0|Uppsala Cathedral
+Roskilde Cathedral|christianity|Lutheran|Roskilde|Denmark|55.6425|12.0804|1|Roskilde Cathedral
+Saint Basil's Cathedral|christianity|Russian Orthodox|Moscow|Russia|55.7525|37.6231|1|Saint Basil's Cathedral
+Cathedral of Christ the Saviour|christianity|Russian Orthodox|Moscow|Russia|55.7446|37.6055|0|Cathedral of Christ the Saviour
+Saint Isaac's Cathedral|christianity|Russian Orthodox|Saint Petersburg|Russia|59.9341|30.3062|1|Saint Isaac's Cathedral
+Church of the Savior on Blood|christianity|Russian Orthodox|Saint Petersburg|Russia|59.9400|30.3289|1|Church of the Savior on Blood
+Kizhi Pogost|christianity|Russian Orthodox|Kizhi Island|Russia|62.0675|35.2236|1|Kizhi Pogost
+Trinity Lavra of St. Sergius|christianity|Russian Orthodox|Sergiyev Posad|Russia|56.3104|38.1300|1|Trinity Lavra of St. Sergius
+Kyiv Pechersk Lavra|christianity|Orthodox|Kyiv|Ukraine|50.4344|30.5574|1|Kyiv Pechersk Lavra
+Saint Sophia Cathedral|christianity|Orthodox|Kyiv|Ukraine|50.4529|30.5143|1|Saint Sophia Cathedral, Kyiv
+Church of Saint Sava|christianity|Serbian Orthodox|Belgrade|Serbia|44.7981|20.4689|0|Church of Saint Sava
+Alexander Nevsky Cathedral|christianity|Bulgarian Orthodox|Sofia|Bulgaria|42.6959|23.3328|0|Alexander Nevsky Cathedral, Sofia
+Rila Monastery|christianity|Bulgarian Orthodox|Rila|Bulgaria|42.1335|23.3403|1|Rila Monastery
+Voroneț Monastery|christianity|Romanian Orthodox|Voroneț|Romania|47.5172|25.8636|1|Voroneț Monastery
+Great Meteoron Monastery|christianity|Greek Orthodox|Kalabaka|Greece|39.7217|21.6306|1|Meteora
+Great Lavra|christianity|Eastern Orthodox|Mount Athos|Greece|40.1722|24.3842|1|Great Lavra
+Monastery of Saint John the Theologian|christianity|Greek Orthodox|Patmos|Greece|37.3086|26.5478|1|Monastery of Saint John the Theologian
+Metropolitan Cathedral of Athens|christianity|Greek Orthodox|Athens|Greece|37.9755|23.7300|0|Metropolitan Cathedral of Athens
+# ---------- Christianity: Middle East, Caucasus & Africa ----------
+Church of the Holy Sepulchre|christianity|Shared (Orthodox, Catholic, Armenian & others)|Jerusalem|Jerusalem|31.7785|35.2296|1|Church of the Holy Sepulchre
+Church of the Nativity|christianity|Shared (Orthodox, Catholic & Armenian)|Bethlehem|Palestine|31.7043|35.2075|1|Church of the Nativity
+Basilica of the Annunciation|christianity|Catholic|Nazareth|Israel|32.7021|35.2978|0|Basilica of the Annunciation
+Saint Catherine's Monastery|christianity|Eastern Orthodox|Mount Sinai|Egypt|28.5560|33.9760|1|Saint Catherine's Monastery
+Hanging Church|christianity|Coptic Orthodox|Cairo|Egypt|30.0053|31.2302|1|Hanging Church
+Our Lady of Lebanon|christianity|Maronite Catholic|Harissa|Lebanon|33.9817|35.6519|0|Our Lady of Lebanon
+Etchmiadzin Cathedral|christianity|Armenian Apostolic|Vagharshapat|Armenia|40.1617|44.2911|1|Etchmiadzin Cathedral
+Khor Virap|christianity|Armenian Apostolic|Lusarat|Armenia|39.8783|44.5761|0|Khor Virap
+Geghard Monastery|christianity|Armenian Apostolic|Goght|Armenia|40.1403|44.8183|1|Geghard
+Svetitskhoveli Cathedral|christianity|Georgian Orthodox|Mtskheta|Georgia|41.8421|44.7208|1|Svetitskhoveli Cathedral
+Gergeti Trinity Church|christianity|Georgian Orthodox|Stepantsminda|Georgia|42.6625|44.6203|0|Gergeti Trinity Church
+Vank Cathedral|christianity|Armenian Apostolic|Isfahan|Iran|32.6355|51.6553|0|Vank Cathedral
+Church of Saint George|christianity|Ethiopian Orthodox Tewahedo|Lalibela|Ethiopia|12.0319|39.0411|1|Church of Saint George, Lalibela
+Church of Our Lady Mary of Zion|christianity|Ethiopian Orthodox Tewahedo|Aksum|Ethiopia|14.1302|38.7193|1|Church of Our Lady Mary of Zion
+Debre Berhan Selassie Church|christianity|Ethiopian Orthodox Tewahedo|Gondar|Ethiopia|12.6090|37.4800|0|Debre Berhan Selassie Church
+Basilica of Our Lady of Peace|christianity|Catholic|Yamoussoukro|Ivory Coast|6.8124|-5.2970|0|Basilica of Our Lady of Peace
+Notre-Dame d'Afrique|christianity|Catholic|Algiers|Algeria|36.8010|3.0420|0|Notre-Dame d'Afrique
+Uganda Martyrs Basilica|christianity|Catholic|Namugongo|Uganda|0.3780|32.6525|0|Uganda Martyrs' Shrine Namugongo
+St. George's Cathedral|christianity|Anglican|Cape Town|South Africa|-33.9255|18.4199|0|St. George's Cathedral, Cape Town
+# ---------- Christianity: Americas ----------
+St. Patrick's Cathedral|christianity|Catholic|New York City|United States|40.7585|-73.9760|0|St. Patrick's Cathedral (Manhattan)
+Cathedral of St. John the Divine|christianity|Episcopal|New York City|United States|40.8038|-73.9619|0|Cathedral of Saint John the Divine
+Trinity Church|christianity|Episcopal|New York City|United States|40.7081|-74.0120|0|Trinity Church (Manhattan)
+Washington National Cathedral|christianity|Episcopal|Washington, D.C.|United States|38.9306|-77.0707|0|Washington National Cathedral
+Basilica of the National Shrine of the Immaculate Conception|christianity|Catholic|Washington, D.C.|United States|38.9333|-76.9973|0|Basilica of the National Shrine of the Immaculate Conception
+Old North Church|christianity|Episcopal|Boston|United States|42.3664|-71.0544|0|Old North Church
+Trinity Church|christianity|Episcopal|Boston|United States|42.3499|-71.0753|0|Trinity Church (Boston)
+Ebenezer Baptist Church|christianity|Baptist|Atlanta|United States|33.7553|-84.3746|0|Ebenezer Baptist Church
+Mother Emanuel AME Church|christianity|African Methodist Episcopal|Charleston|United States|32.7860|-79.9330|0|Emanuel African Methodist Episcopal Church
+St. Louis Cathedral|christianity|Catholic|New Orleans|United States|29.9580|-90.0637|0|St. Louis Cathedral (New Orleans)
+Cathedral Basilica of Saint Louis|christianity|Catholic|St. Louis|United States|38.6425|-90.2551|0|Cathedral Basilica of Saint Louis (St. Louis)
+Mission San José|christianity|Catholic|San Antonio|United States|29.3622|-98.4794|1|Mission San José (San Antonio)
+Chapel of the Holy Cross|christianity|Catholic|Sedona|United States|34.8325|-111.7667|0|Chapel of the Holy Cross (Sedona, Arizona)
+Thorncrown Chapel|christianity|Nondenominational|Eureka Springs|United States|36.4220|-93.7801|0|Thorncrown Chapel
+Salt Lake Temple|christianity|The Church of Jesus Christ of Latter-day Saints|Salt Lake City|United States|40.7704|-111.8919|0|Salt Lake Temple
+Grace Cathedral|christianity|Episcopal|San Francisco|United States|37.7919|-122.4134|0|Grace Cathedral, San Francisco
+Notre-Dame Basilica|christianity|Catholic|Montreal|Canada|45.5045|-73.5562|0|Notre-Dame Basilica (Montreal)
+Saint Joseph's Oratory|christianity|Catholic|Montreal|Canada|45.4925|-73.6178|0|Saint Joseph's Oratory
+Basilica of Sainte-Anne-de-Beaupré|christianity|Catholic|Beaupré|Canada|47.0244|-70.9283|0|Basilica of Sainte-Anne-de-Beaupré
+Basilica of Our Lady of Guadalupe|christianity|Catholic|Mexico City|Mexico|19.4847|-99.1178|0|Basilica of Our Lady of Guadalupe
+Mexico City Metropolitan Cathedral|christianity|Catholic|Mexico City|Mexico|19.4344|-99.1332|1|Mexico City Metropolitan Cathedral
+Puebla Cathedral|christianity|Catholic|Puebla|Mexico|19.0425|-98.1981|1|Puebla Cathedral
+Parroquia de San Miguel Arcángel|christianity|Catholic|San Miguel de Allende|Mexico|20.9144|-100.7439|1|Parroquia de San Miguel Arcángel
+Basilica of Esquipulas|christianity|Catholic|Esquipulas|Guatemala|14.5628|-89.3517|0|Basilica of Esquipulas
+Havana Cathedral|christianity|Catholic|Havana|Cuba|23.1413|-82.3517|1|Havana Cathedral
+Cathedral of Santa María la Menor|christianity|Catholic|Santo Domingo|Dominican Republic|18.4730|-69.8838|1|Cathedral of Santa María la Menor
+Las Lajas Sanctuary|christianity|Catholic|Ipiales|Colombia|0.8053|-77.5859|0|Las Lajas Sanctuary
+Salt Cathedral of Zipaquirá|christianity|Catholic|Zipaquirá|Colombia|5.0187|-74.0060|0|Salt Cathedral of Zipaquirá
+Church of the Society of Jesus|christianity|Catholic|Quito|Ecuador|-0.2205|-78.5136|1|Church of the Society of Jesus (Quito)
+Basilica of the National Vow|christianity|Catholic|Quito|Ecuador|-0.2148|-78.5070|0|Basílica del Voto Nacional
+Cusco Cathedral|christianity|Catholic|Cusco|Peru|-13.5164|-71.9786|1|Cusco Cathedral
+Basilica and Convent of San Francisco|christianity|Catholic|Lima|Peru|-12.0459|-77.0275|1|Basilica and Convent of San Francisco, Lima
+Cathedral of Brasília|christianity|Catholic|Brasília|Brazil|-15.7983|-47.8755|1|Cathedral of Brasília
+Basilica of Our Lady of Aparecida|christianity|Catholic|Aparecida|Brazil|-22.8508|-45.2339|0|Basilica of the National Shrine of Our Lady of Aparecida
+Rio de Janeiro Cathedral|christianity|Catholic|Rio de Janeiro|Brazil|-22.9107|-43.1808|0|Rio de Janeiro Cathedral
+Church and Convent of São Francisco|christianity|Catholic|Salvador|Brazil|-12.9761|-38.5094|1|Church and Convent of São Francisco (Salvador)
+Buenos Aires Metropolitan Cathedral|christianity|Catholic|Buenos Aires|Argentina|-34.6077|-58.3731|0|Buenos Aires Metropolitan Cathedral
+Basilica of Our Lady of Luján|christianity|Catholic|Luján|Argentina|-34.5640|-59.1203|0|Basilica of Our Lady of Luján
+Santiago Metropolitan Cathedral|christianity|Catholic|Santiago|Chile|-33.4377|-70.6505|0|Santiago Metropolitan Cathedral
+Church of San Francisco|christianity|Catholic|Castro|Chile|-42.4823|-73.7640|1|Church of San Francisco, Castro
+# ---------- Christianity: Asia & Oceania ----------
+Basilica of Bom Jesus|christianity|Catholic|Old Goa|India|15.5009|73.9116|1|Basilica of Bom Jesus
+Se Cathedral|christianity|Catholic|Old Goa|India|15.5036|73.9122|1|Se Cathedral
+San Thome Basilica|christianity|Catholic|Chennai|India|13.0336|80.2778|0|San Thome Church
+Manila Cathedral|christianity|Catholic|Manila|Philippines|14.5915|120.9736|0|Manila Cathedral
+San Agustin Church|christianity|Catholic|Manila|Philippines|14.5888|120.9752|1|San Agustin Church (Manila)
+Paoay Church|christianity|Catholic|Paoay|Philippines|18.0614|120.5214|1|Paoay Church
+Notre-Dame Cathedral Basilica of Saigon|christianity|Catholic|Ho Chi Minh City|Vietnam|10.7798|106.6990|0|Notre-Dame Cathedral Basilica of Saigon
+St Andrew's Cathedral|christianity|Anglican|Singapore|Singapore|1.2925|103.8522|0|St Andrew's Cathedral, Singapore
+Myeongdong Cathedral|christianity|Catholic|Seoul|South Korea|37.5633|126.9873|0|Myeongdong Cathedral
+Ōura Church|christianity|Catholic|Nagasaki|Japan|32.7344|129.8700|1|Ōura Church
+Ruins of St. Paul's|christianity|Catholic|Macau|China|22.1974|113.5408|1|Ruins of Saint Paul's
+St Mary's Cathedral|christianity|Catholic|Sydney|Australia|-33.8712|151.2131|0|St Mary's Cathedral, Sydney
+St Paul's Cathedral|christianity|Anglican|Melbourne|Australia|-37.8169|144.9675|0|St Paul's Cathedral, Melbourne
+Cardboard Cathedral|christianity|Anglican|Christchurch|New Zealand|-43.5354|172.6430|0|Cardboard Cathedral
+# ---------- Islam ----------
+Masjid al-Haram|islam|Sunni|Mecca|Saudi Arabia|21.4225|39.8262|0|Great Mosque of Mecca
+Al-Masjid an-Nabawi|islam|Sunni|Medina|Saudi Arabia|24.4672|39.6111|0|Prophet's Mosque
+Quba Mosque|islam|Sunni|Medina|Saudi Arabia|24.4393|39.6172|0|Quba Mosque
+Al-Aqsa Mosque|islam|Sunni|Jerusalem|Jerusalem|31.7761|35.2358|1|Al-Aqsa Mosque
+Dome of the Rock|islam|Sunni (shrine)|Jerusalem|Jerusalem|31.7781|35.2354|1|Dome of the Rock
+Hagia Sophia|islam|Sunni|Istanbul|Turkey|41.0086|28.9802|1|Hagia Sophia
+Sultan Ahmed Mosque (Blue Mosque)|islam|Sunni|Istanbul|Turkey|41.0054|28.9768|1|Blue Mosque, Istanbul
+Süleymaniye Mosque|islam|Sunni|Istanbul|Turkey|41.0162|28.9640|1|Süleymaniye Mosque
+Selimiye Mosque|islam|Sunni|Edirne|Turkey|41.6781|26.5594|1|Selimiye Mosque
+Umayyad Mosque|islam|Sunni|Damascus|Syria|33.5116|36.3065|1|Umayyad Mosque
+Imam Husayn Shrine|islam|Shia|Karbala|Iraq|32.6165|44.0324|0|Imam Husayn Shrine
+Imam Ali Shrine|islam|Shia|Najaf|Iraq|31.9959|44.3146|0|Imam Ali Shrine
+Great Mosque of Samarra|islam|Sunni (historic)|Samarra|Iraq|34.2058|43.8798|1|Great Mosque of Samarra
+Imam Reza Shrine|islam|Shia|Mashhad|Iran|36.2880|59.6157|0|Imam Reza shrine
+Shah Mosque|islam|Shia|Isfahan|Iran|32.6544|51.6777|1|Shah Mosque (Isfahan)
+Sheikh Lotfollah Mosque|islam|Shia|Isfahan|Iran|32.6573|51.6787|1|Sheikh Lotfollah Mosque
+Nasir al-Mulk Mosque|islam|Shia|Shiraz|Iran|29.6083|52.5484|0|Nasir al-Mulk Mosque
+Sheikh Zayed Grand Mosque|islam|Sunni|Abu Dhabi|United Arab Emirates|24.4128|54.4750|0|Sheikh Zayed Grand Mosque
+Sultan Qaboos Grand Mosque|islam|Ibadi|Muscat|Oman|23.5838|58.3888|0|Sultan Qaboos Grand Mosque
+Al-Azhar Mosque|islam|Sunni|Cairo|Egypt|30.0458|31.2627|1|Al-Azhar Mosque
+Mosque of Muhammad Ali|islam|Sunni|Cairo|Egypt|30.0287|31.2599|1|Mosque of Muhammad Ali
+Mosque of Ibn Tulun|islam|Sunni|Cairo|Egypt|30.0287|31.2495|1|Mosque of Ibn Tulun
+Great Mosque of Kairouan|islam|Sunni|Kairouan|Tunisia|35.6812|10.1036|1|Great Mosque of Kairouan
+Hassan II Mosque|islam|Sunni|Casablanca|Morocco|33.6084|-7.6326|0|Hassan II Mosque
+Koutoubia Mosque|islam|Sunni|Marrakesh|Morocco|31.6237|-7.9936|1|Koutoubia Mosque
+Al-Qarawiyyin Mosque|islam|Sunni|Fez|Morocco|34.0646|-4.9737|1|Al-Qarawiyyin Mosque
+Great Mosque of Djenné|islam|Sunni|Djenné|Mali|13.9053|-4.5555|1|Great Mosque of Djenné
+Djinguereber Mosque|islam|Sunni|Timbuktu|Mali|16.7703|-3.0103|1|Djinguereber Mosque
+Larabanga Mosque|islam|Sunni|Larabanga|Ghana|9.2214|-1.8608|0|Larabanga Mosque
+Great Mosque of Touba|islam|Sufi (Mouride)|Touba|Senegal|14.8650|-15.8807|0|Great Mosque of Touba
+Faisal Mosque|islam|Sunni|Islamabad|Pakistan|33.7299|73.0372|0|Faisal Mosque
+Badshahi Mosque|islam|Sunni|Lahore|Pakistan|31.5881|74.3101|0|Badshahi Mosque
+Blue Mosque (Shrine of Ali)|islam|Sunni|Mazar-i-Sharif|Afghanistan|36.7090|67.1100|0|Blue Mosque, Mazar-i-Sharif
+Jama Masjid|islam|Sunni|Delhi|India|28.6507|77.2334|0|Jama Masjid, Delhi
+Haji Ali Dargah|islam|Sufi|Mumbai|India|18.9827|72.8090|0|Haji Ali Dargah
+Ajmer Sharif Dargah|islam|Sufi|Ajmer|India|26.4565|74.6283|0|Ajmer Sharif Dargah
+Sixty Dome Mosque|islam|Sunni|Bagerhat|Bangladesh|22.6743|89.7417|1|Sixty Dome Mosque
+Bibi-Khanym Mosque|islam|Sunni|Samarkand|Uzbekistan|39.6609|66.9790|1|Bibi-Khanym Mosque
+Kalan Mosque|islam|Sunni|Bukhara|Uzbekistan|39.7758|64.4146|1|Kalan Mosque
+Kul Sharif Mosque|islam|Sunni|Kazan|Russia|55.7984|49.1052|1|Qolşärif Mosque
+Great Mosque of Xi'an|islam|Sunni|Xi'an|China|34.2643|108.9384|0|Great Mosque of Xi'an
+Id Kah Mosque|islam|Sunni|Kashgar|China|39.4719|75.9846|0|Id Kah Mosque
+Istiqlal Mosque|islam|Sunni|Jakarta|Indonesia|-6.1702|106.8310|0|Istiqlal Mosque, Jakarta
+Baiturrahman Grand Mosque|islam|Sunni|Banda Aceh|Indonesia|5.5536|95.3172|0|Baiturrahman Grand Mosque
+Putra Mosque|islam|Sunni|Putrajaya|Malaysia|2.9360|101.6895|0|Putra Mosque
+Omar Ali Saifuddien Mosque|islam|Sunni|Bandar Seri Begawan|Brunei|4.8895|114.9395|0|Omar Ali Saifuddien Mosque
+Gazi Husrev-beg Mosque|islam|Sunni|Sarajevo|Bosnia and Herzegovina|43.8590|18.4294|0|Gazi Husrev-beg Mosque
+Grand Mosque of Paris|islam|Sunni|Paris|France|48.8420|2.3551|0|Grand Mosque of Paris
+East London Mosque|islam|Sunni|London|United Kingdom|51.5176|-0.0653|0|East London Mosque
+Islamic Center of America|islam|Shia|Dearborn|United States|42.3196|-83.2214|0|Islamic Center of America
+# ---------- Judaism ----------
+Western Wall|judaism|Orthodox|Jerusalem|Jerusalem|31.7767|35.2345|1|Western Wall
+Hurva Synagogue|judaism|Orthodox|Jerusalem|Jerusalem|31.7752|35.2310|0|Hurva Synagogue
+Abuhav Synagogue|judaism|Orthodox|Safed|Israel|32.9658|35.4945|0|Abuhav synagogue
+Dohány Street Synagogue|judaism|Neolog|Budapest|Hungary|47.4958|19.0606|0|Dohány Street Synagogue
+Old New Synagogue|judaism|Orthodox|Prague|Czech Republic|50.0901|14.4189|0|Old New Synagogue
+Portuguese Synagogue|judaism|Sephardic Orthodox|Amsterdam|Netherlands|52.3675|4.9050|0|Portuguese Synagogue (Amsterdam)
+Bevis Marks Synagogue|judaism|Sephardic Orthodox|London|United Kingdom|51.5145|-0.0790|0|Bevis Marks Synagogue
+Great Synagogue of Rome|judaism|Orthodox|Rome|Italy|41.8919|12.4776|0|Great Synagogue of Rome
+Great Synagogue of Florence|judaism|Orthodox|Florence|Italy|43.7724|11.2655|0|Great Synagogue of Florence
+New Synagogue|judaism|Masorti|Berlin|Germany|52.5249|13.3944|0|New Synagogue (Berlin)
+Moscow Choral Synagogue|judaism|Orthodox|Moscow|Russia|55.7558|37.6366|0|Moscow Choral Synagogue
+El Ghriba Synagogue|judaism|Orthodox|Djerba|Tunisia|33.8136|10.8592|0|El Ghriba synagogue
+Paradesi Synagogue|judaism|Orthodox (Malabar)|Kochi|India|9.9573|76.2593|0|Paradesi Synagogue
+Touro Synagogue|judaism|Orthodox|Newport|United States|41.4895|-71.3106|0|Touro Synagogue
+Congregation Emanu-El|judaism|Reform|New York City|United States|40.7686|-73.9701|0|Congregation Emanu-El of New York
+Eldridge Street Synagogue|judaism|Orthodox|New York City|United States|40.7149|-73.9937|0|Eldridge Street Synagogue
+Mikvé Israel-Emanuel|judaism|Sephardic (Reconstructionist)|Willemstad|Curaçao|12.1080|-68.9364|1|Curaçao synagogue
+Kahal Zur Israel Synagogue|judaism|Sephardic|Recife|Brazil|-8.0624|-34.8711|0|Kahal Zur Israel Synagogue
+Great Synagogue|judaism|Orthodox|Sydney|Australia|-33.8737|151.2101|0|Great Synagogue (Sydney)
+# ---------- Hinduism ----------
+Kashi Vishwanath Temple|hinduism|Shaivism|Varanasi|India|25.3109|83.0107|0|Kashi Vishwanath Temple
+Ram Mandir|hinduism|Vaishnavism|Ayodhya|India|26.7956|82.1943|0|Ram Mandir
+Meenakshi Temple|hinduism|Shaivism|Madurai|India|9.9195|78.1193|0|Meenakshi Temple
+Brihadisvara Temple|hinduism|Shaivism|Thanjavur|India|10.7828|79.1318|1|Brihadisvara Temple, Thanjavur
+Ranganathaswamy Temple|hinduism|Vaishnavism|Srirangam|India|10.8624|78.6896|0|Ranganathaswamy Temple, Srirangam
+Venkateswara Temple|hinduism|Vaishnavism|Tirumala|India|13.6833|79.3474|0|Venkateswara Temple, Tirumala
+Jagannath Temple|hinduism|Vaishnavism|Puri|India|19.8048|85.8181|0|Jagannath Temple, Puri
+Konark Sun Temple|hinduism|Saura (historic)|Konark|India|19.8876|86.0945|1|Konark Sun Temple
+Kandariya Mahadeva Temple|hinduism|Shaivism|Khajuraho|India|24.8523|79.9196|1|Kandariya Mahadeva Temple
+Somnath Temple|hinduism|Shaivism|Veraval|India|20.8880|70.4012|0|Somnath temple
+Kedarnath Temple|hinduism|Shaivism|Kedarnath|India|30.7352|79.0669|0|Kedarnath Temple
+Badrinath Temple|hinduism|Vaishnavism|Badrinath|India|30.7433|79.4938|0|Badrinath Temple
+Swaminarayan Akshardham|hinduism|Swaminarayan|Delhi|India|28.6127|77.2773|0|Akshardham (Delhi)
+Siddhivinayak Temple|hinduism|Ganapatya|Mumbai|India|19.0170|72.8302|0|Siddhivinayak Temple, Mumbai
+Kamakhya Temple|hinduism|Shaktism|Guwahati|India|26.1664|91.7055|0|Kamakhya Temple
+Virupaksha Temple|hinduism|Shaivism|Hampi|India|15.3350|76.4600|1|Virupaksha Temple, Hampi
+Kailasa Temple|hinduism|Shaivism|Ellora|India|20.0240|75.1790|1|Kailasa temple, Ellora
+Pashupatinath Temple|hinduism|Shaivism|Kathmandu|Nepal|27.7104|85.3487|1|Pashupatinath Temple
+Nallur Kandaswamy Temple|hinduism|Shaivism (Murugan)|Jaffna|Sri Lanka|9.6747|80.0294|0|Nallur Kandaswamy Temple
+Batu Caves|hinduism|Shaivism (Murugan)|Gombak|Malaysia|3.2379|101.6840|0|Batu Caves
+Sri Mariamman Temple|hinduism|Shaktism|Singapore|Singapore|1.2827|103.8452|0|Sri Mariamman Temple, Singapore
+Prambanan|hinduism|Shaivism (historic)|Sleman|Indonesia|-7.7520|110.4915|1|Prambanan
+Besakih Temple|hinduism|Balinese Hinduism|Karangasem, Bali|Indonesia|-8.3741|115.4520|0|Besakih
+Tanah Lot|hinduism|Balinese Hinduism|Tabanan, Bali|Indonesia|-8.6212|115.0868|0|Tanah Lot
+BAPS Shri Swaminarayan Mandir|hinduism|Swaminarayan|London|United Kingdom|51.5476|-0.2615|0|BAPS Shri Swaminarayan Mandir London
+# ---------- Buddhism ----------
+Mahabodhi Temple|buddhism|Buddhism|Bodh Gaya|India|24.6959|84.9911|1|Mahabodhi Temple
+Great Stupa of Sanchi|buddhism|Buddhism (historic)|Sanchi|India|23.4793|77.7398|1|Sanchi
+Dhamek Stupa|buddhism|Buddhism|Sarnath|India|25.3811|83.0245|0|Dhamek Stupa
+Hemis Monastery|buddhism|Tibetan (Drukpa)|Ladakh|India|33.9150|77.7029|0|Hemis Monastery
+Tsuglagkhang Complex|buddhism|Tibetan (Gelug)|McLeod Ganj|India|32.2326|76.3242|0|Tsuglagkhang Complex
+Maya Devi Temple|buddhism|Buddhism|Lumbini|Nepal|27.4693|83.2757|1|Maya Devi Temple, Lumbini
+Boudhanath|buddhism|Tibetan|Kathmandu|Nepal|27.7215|85.3620|1|Boudhanath
+Swayambhunath|buddhism|Newar & Tibetan|Kathmandu|Nepal|27.7149|85.2904|1|Swayambhunath
+Paro Taktsang (Tiger's Nest)|buddhism|Vajrayana (Drukpa)|Paro|Bhutan|27.4919|89.3634|0|Paro Taktsang
+Punakha Dzong|buddhism|Vajrayana (Drukpa)|Punakha|Bhutan|27.5918|89.8775|0|Punakha Dzong
+Jokhang|buddhism|Tibetan|Lhasa|China|29.6530|91.1323|1|Jokhang
+Potala Palace|buddhism|Tibetan (Gelug)|Lhasa|China|29.6578|91.1170|1|Potala Palace
+Tashilhunpo Monastery|buddhism|Tibetan (Gelug)|Shigatse|China|29.2690|88.8667|0|Tashilhunpo Monastery
+Shaolin Monastery|buddhism|Chan|Dengfeng|China|34.5068|112.9354|1|Shaolin Monastery
+White Horse Temple|buddhism|Mahayana|Luoyang|China|34.7247|112.6008|0|White Horse Temple
+Yonghe Temple (Lama Temple)|buddhism|Tibetan (Gelug)|Beijing|China|39.9471|116.4174|0|Yonghe Temple
+Jade Buddha Temple|buddhism|Chan|Shanghai|China|31.2414|121.4454|0|Jade Buddha Temple
+Lingyin Temple|buddhism|Chan|Hangzhou|China|30.2420|120.0970|0|Lingyin Temple
+Leshan Giant Buddha|buddhism|Mahayana|Leshan|China|29.5446|103.7733|1|Leshan Giant Buddha
+Po Lin Monastery|buddhism|Chan|Hong Kong|China|22.2557|113.9050|0|Po Lin Monastery
+Shwedagon Pagoda|buddhism|Theravada|Yangon|Myanmar|16.7983|96.1497|0|Shwedagon Pagoda
+Ananda Temple|buddhism|Theravada|Bagan|Myanmar|21.1708|94.8679|1|Ananda Temple
+Kyaiktiyo Pagoda (Golden Rock)|buddhism|Theravada|Kyaikto|Myanmar|17.4817|97.0983|0|Kyaiktiyo Pagoda
+Wat Phra Kaew|buddhism|Theravada|Bangkok|Thailand|13.7516|100.4927|0|Wat Phra Kaew
+Wat Arun|buddhism|Theravada|Bangkok|Thailand|13.7437|100.4888|0|Wat Arun
+Wat Pho|buddhism|Theravada|Bangkok|Thailand|13.7465|100.4930|0|Wat Pho
+Wat Phra That Doi Suthep|buddhism|Theravada|Chiang Mai|Thailand|18.8048|98.9216|0|Wat Phra That Doi Suthep
+Wat Rong Khun (White Temple)|buddhism|Theravada|Chiang Rai|Thailand|19.8243|99.7631|0|Wat Rong Khun
+Pha That Luang|buddhism|Theravada|Vientiane|Laos|17.9764|102.6336|0|Pha That Luang
+Wat Xieng Thong|buddhism|Theravada|Luang Prabang|Laos|19.8975|102.1427|1|Wat Xieng Thong
+Angkor Wat|buddhism|Theravada (originally Hindu)|Siem Reap|Cambodia|13.4125|103.8670|1|Angkor Wat
+One Pillar Pagoda|buddhism|Mahayana|Hanoi|Vietnam|21.0359|105.8336|0|One Pillar Pagoda
+Thiên Mụ Pagoda|buddhism|Mahayana|Huế|Vietnam|16.4532|107.5446|0|Thiên Mụ Pagoda
+Temple of the Tooth|buddhism|Theravada|Kandy|Sri Lanka|7.2936|80.6413|1|Temple of the Tooth
+Ruwanwelisaya|buddhism|Theravada|Anuradhapura|Sri Lanka|8.3500|80.3964|1|Ruwanwelisaya
+Dambulla Cave Temple|buddhism|Theravada|Dambulla|Sri Lanka|7.8567|80.6490|1|Dambulla cave temple
+Borobudur|buddhism|Mahayana|Magelang|Indonesia|-7.6079|110.2038|1|Borobudur
+Bulguksa|buddhism|Korean Seon|Gyeongju|South Korea|35.7900|129.3320|1|Bulguksa
+Haeinsa|buddhism|Korean Seon|Hapcheon|South Korea|35.8013|128.0980|1|Haeinsa
+Jogyesa|buddhism|Korean Seon (Jogye Order)|Seoul|South Korea|37.5740|126.9817|0|Jogyesa
+Tōdai-ji|buddhism|Kegon|Nara|Japan|34.6890|135.8398|1|Tōdai-ji
+Kinkaku-ji|buddhism|Rinzai Zen|Kyoto|Japan|35.0394|135.7292|1|Kinkaku-ji
+Kiyomizu-dera|buddhism|Kitahossō|Kyoto|Japan|34.9949|135.7850|1|Kiyomizu-dera
+Byōdō-in|buddhism|Jōdo & Tendai|Uji|Japan|34.8893|135.8077|1|Byōdō-in
+Kongōbu-ji|buddhism|Shingon|Kōya|Japan|34.2131|135.5841|1|Kongōbu-ji
+Sensō-ji|buddhism|Shō Kannon|Tokyo|Japan|35.7148|139.7967|0|Sensō-ji
+Kōtoku-in (Great Buddha of Kamakura)|buddhism|Jōdo|Kamakura|Japan|35.3167|139.5358|0|Kōtoku-in
+Erdene Zuu Monastery|buddhism|Tibetan|Kharkhorin|Mongolia|47.2017|102.8433|1|Erdene Zuu Monastery
+Gandan Monastery|buddhism|Tibetan (Gelug)|Ulaanbaatar|Mongolia|47.9213|106.8946|0|Gandan Monastery
+# ---------- Sikhism ----------
+Harmandir Sahib (Golden Temple)|sikhism|Sikhism|Amritsar|India|31.6200|74.8765|0|Golden Temple
+Gurdwara Bangla Sahib|sikhism|Sikhism|Delhi|India|28.6264|77.2091|0|Gurdwara Bangla Sahib
+Takht Sri Patna Sahib|sikhism|Sikhism|Patna|India|25.5956|85.2306|0|Takht Sri Patna Sahib
+Takht Sachkhand Sri Hazur Sahib|sikhism|Sikhism|Nanded|India|19.1528|77.3146|0|Hazur Sahib
+Takht Sri Keshgarh Sahib|sikhism|Sikhism|Anandpur Sahib|India|31.2334|76.5023|0|Takht Sri Keshgarh Sahib
+Hemkund Sahib|sikhism|Sikhism|Chamoli|India|30.6969|79.6094|0|Hemkund
+Gurdwara Darbar Sahib Kartarpur|sikhism|Sikhism|Kartarpur|Pakistan|32.0859|75.0164|0|Gurdwara Darbar Sahib Kartarpur
+Gurdwara Janam Asthan|sikhism|Sikhism|Nankana Sahib|Pakistan|31.4500|73.7069|0|Gurdwara Janam Asthan
+# ---------- Shinto ----------
+Ise Grand Shrine|shinto|Shinto|Ise|Japan|34.4550|136.7256|0|Ise Grand Shrine
+Fushimi Inari-taisha|shinto|Shinto|Kyoto|Japan|34.9671|135.7727|0|Fushimi Inari-taisha
+Meiji Shrine|shinto|Shinto|Tokyo|Japan|35.6764|139.6993|0|Meiji Shrine
+Itsukushima Shrine|shinto|Shinto|Hatsukaichi|Japan|34.2959|132.3198|1|Itsukushima Shrine
+Izumo-taisha|shinto|Shinto|Izumo|Japan|35.4020|132.6855|0|Izumo-taisha
+Nikkō Tōshō-gū|shinto|Shinto|Nikkō|Japan|36.7581|139.5986|1|Nikkō Tōshō-gū
+Kasuga-taisha|shinto|Shinto|Nara|Japan|34.6812|135.8484|1|Kasuga-taisha
+# ---------- Jainism ----------
+Ranakpur Jain Temple|jainism|Śvetāmbara|Ranakpur|India|25.1158|73.4728|0|Ranakpur Jain temple
+Dilwara Temples|jainism|Śvetāmbara|Mount Abu|India|24.5930|72.7230|0|Dilwara Temples
+Palitana Temples|jainism|Śvetāmbara|Palitana|India|21.4825|71.7972|0|Palitana temples
+Gommateshwara (Shravanabelagola)|jainism|Digambara|Shravanabelagola|India|12.8543|76.4846|0|Gommateshwara statue
+Shikharji|jainism|Jainism|Giridih|India|23.9617|86.1350|0|Shikharji
+# ---------- Bahá'í Faith ----------
+Lotus Temple|bahai|Bahá'í Faith|Delhi|India|28.5535|77.2588|0|Lotus Temple
+Shrine of the Báb|bahai|Bahá'í Faith|Haifa|Israel|32.8144|34.9871|1|Shrine of the Báb
+Shrine of Bahá'u'lláh|bahai|Bahá'í Faith|Acre|Israel|32.9437|35.0920|1|Shrine of Bahá'u'lláh
+Bahá'í House of Worship|bahai|Bahá'í Faith|Wilmette|United States|42.0743|-87.6844|0|Bahá'í House of Worship (Wilmette, Illinois)
+Bahá'í Temple of South America|bahai|Bahá'í Faith|Santiago|Chile|-33.4723|-70.5098|0|Bahá'í House of Worship (Santiago)
+# ---------- Taoism & Chinese traditions ----------
+White Cloud Temple|chinese|Taoism (Quanzhen)|Beijing|China|39.8992|116.3368|0|White Cloud Temple
+Purple Heaven Palace (Wudang)|chinese|Taoism|Shiyan|China|32.4013|111.0052|1|Wudang Mountains
+Temple of Confucius|chinese|Confucianism|Qufu|China|35.5970|116.9915|1|Temple of Confucius, Qufu
+Wong Tai Sin Temple|chinese|Taoism|Hong Kong|China|22.3424|114.1935|0|Wong Tai Sin Temple
+Lungshan Temple|chinese|Chinese folk religion & Buddhism|Taipei|Taiwan|25.0372|121.4999|0|Lungshan Temple of Manka
+Thean Hou Temple|chinese|Chinese folk religion (Mazu)|Kuala Lumpur|Malaysia|3.1218|101.6870|0|Thean Hou Temple
+# ---------- Zoroastrianism & others ----------
+Yazd Atash Behram|zoroastrianism|Zoroastrianism|Yazd|Iran|31.8820|54.3700|0|Yazd Atash Behram
+Cao Đài Holy See|other|Caodaism|Tây Ninh|Vietnam|11.3000|106.1300|0|Cao Đài Holy See

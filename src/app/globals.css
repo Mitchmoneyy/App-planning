@@ -1,0 +1,629 @@
+/* ==========================================================================
+   Global Sanctuary — base styles
+   Calm, reverent palette: deep night blue, warm gold, soft ivory.
+   ========================================================================== */
+
+:root {
+  --night: #0b1020;
+  --night-2: #141b33;
+  --gold: #d9b26f;
+  --gold-strong: #c2873a;
+  --ivory: #fbf7ee;
+
+  /* Panels floating over the globe */
+  --panel-bg: rgba(251, 247, 238, 0.96);
+  --panel-text: #1f2433;
+  --panel-muted: #5d6475;
+  --panel-border: rgba(31, 36, 51, 0.12);
+  --chip-bg: #efe8d8;
+  --chip-on-bg: #1f2433;
+  --chip-on-text: #fbf7ee;
+
+  /* Content pages */
+  --page-bg: var(--ivory);
+  --page-text: #1f2433;
+  --page-muted: #5d6475;
+  --link: #8a5a14;
+
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(5, 8, 20, 0.28);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --panel-bg: rgba(20, 27, 51, 0.96);
+    --panel-text: #f1ece0;
+    --panel-muted: #a9b0c2;
+    --panel-border: rgba(241, 236, 224, 0.14);
+    --chip-bg: #232c4d;
+    --chip-on-bg: #d9b26f;
+    --chip-on-text: #1a1406;
+    --page-bg: var(--night);
+    --page-text: #f1ece0;
+    --page-muted: #a9b0c2;
+    --link: #e6c587;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--page-bg);
+  color: var(--page-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: var(--link);
+}
+
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ---------- Home: globe ---------- */
+
+.explorer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  /* Starry night behind the globe */
+  background:
+    radial-gradient(1px 1px at 12% 18%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 68% 12%, #fff6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 82% 64%, #fff7 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 78%, #fff5 50%, transparent 51%),
+    radial-gradient(1px 1px at 46% 40%, #fff4 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 92% 28%, #fff6 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 56%, #fff5 50%, transparent 51%),
+    radial-gradient(ellipse at 50% 40%, var(--night-2), var(--night) 70%);
+}
+
+.explorer .globe {
+  /* Higher specificity than MapLibre's own ".maplibregl-map { position: relative }" */
+  position: absolute;
+  inset: 0;
+}
+
+/* Let the starry background show through the map canvas */
+.globe .maplibregl-canvas {
+  outline: none;
+}
+
+.topbar {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none; /* only children are clickable */
+  max-width: 560px;
+}
+
+.topbar > * {
+  pointer-events: auto;
+}
+
+.brand {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  color: var(--ivory);
+  align-self: flex-start;
+  /* Dark pill keeps the name readable over light parts of the map */
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(11, 16, 32, 0.72);
+}
+
+.brand__mark {
+  color: var(--gold);
+}
+
+.topbar__row {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- Search ---------- */
+
+.search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.search__icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--panel-muted);
+  pointer-events: none;
+}
+
+.search__input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: inherit;
+  font-size: 16px; /* 16px stops iOS zooming in on focus */
+  box-shadow: var(--shadow);
+}
+
+.search__input::placeholder {
+  color: var(--panel-muted);
+}
+
+.search__results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  z-index: 5;
+}
+
+.search__result {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.search__result.is-active {
+  background: var(--chip-bg);
+}
+
+.search__kind {
+  grid-row: span 2;
+  align-self: center;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--panel-muted);
+  min-width: 52px;
+}
+
+.search__label {
+  font-weight: 600;
+}
+
+.search__detail,
+.search__empty {
+  font-size: 0.85rem;
+  color: var(--panel-muted);
+}
+
+.search__empty {
+  padding: 10px;
+}
+
+/* ---------- Buttons ---------- */
+
+.filter-button {
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  box-shadow: var(--shadow);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.filter-button.is-on {
+  border-color: var(--gold);
+}
+
+.badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold-strong);
+  color: #fff;
+  font-size: 0.75rem;
+  display: inline-grid;
+  place-items: center;
+}
+
+.primary-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1a1406;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primary-button:hover {
+  background: #e3c084;
+}
+
+.link-button {
+  border: none;
+  background: none;
+  color: var(--link);
+  padding: 4px;
+}
+
+.link-button:disabled {
+  color: var(--panel-muted);
+  cursor: default;
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.icon-button:hover {
+  background: var(--chip-bg);
+}
+
+/* ---------- Floating panels ---------- */
+
+.panel {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  /* Sits above the map credits line */
+  bottom: calc(max(16px, env(safe-area-inset-bottom)) + 28px);
+  max-width: 440px;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  animation: rise 220ms ease-out;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}
+
+/* Leave room for the map's zoom/compass buttons on the right on phones */
+@media (max-width: 600px) {
+  .panel {
+    right: 64px;
+  }
+}
+
+.place-card__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.place-card__title {
+  margin: 4px 36px 4px 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.place-card__meta {
+  margin: 0 0 10px;
+  color: var(--panel-muted);
+}
+
+.place-card .primary-button {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.faith-tag {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--panel-muted);
+}
+
+.heritage-badge {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  color: var(--gold-strong);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ---------- Filters ---------- */
+
+.filters {
+  top: calc(max(12px, env(safe-area-inset-top)) + 108px);
+  overflow-y: auto;
+}
+
+@media (min-width: 601px) {
+  .filters {
+    bottom: auto;
+    max-height: calc(100vh - 140px);
+  }
+}
+
+.filters__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filters h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+}
+
+.filters fieldset {
+  border: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.filters fieldset:disabled {
+  opacity: 0.55;
+}
+
+.filters legend {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--panel-text);
+  font-size: 0.9rem;
+}
+
+.chip.is-on {
+  background: var(--chip-on-bg);
+  color: var(--chip-on-text);
+}
+
+.chip__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--gold-strong);
+}
+
+.hint {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--panel-muted);
+}
+
+.filters__footer {
+  margin-top: 18px;
+}
+
+.filters__footer .primary-button {
+  width: 100%;
+}
+
+/* ---------- Status note ---------- */
+
+.status-note {
+  position: absolute;
+  top: calc(max(12px, env(safe-area-inset-top)) + 108px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+  padding: 8px 8px 8px 16px;
+  border-radius: 999px;
+  background: rgba(11, 16, 32, 0.85);
+  color: var(--ivory);
+  font-size: 0.85rem;
+  box-shadow: var(--shadow);
+  width: max-content;
+}
+
+.status-note .icon-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Map bits ---------- */
+
+.user-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6);
+  animation: pulse 2.4s infinite;
+}
+
+@keyframes pulse {
+  70% {
+    box-shadow: 0 0 0 14px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-dot {
+    animation: none;
+  }
+}
+
+.locate-button {
+  display: grid !important;
+  place-items: center;
+  color: #333;
+}
+
+.maplibregl-ctrl-bottom-right {
+  margin-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+/* ---------- Place detail page ---------- */
+
+.place-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px 48px;
+}
+
+.place-page__nav {
+  padding: 8px 0 16px;
+}
+
+.back-link {
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.place-page .faith-tag {
+  color: var(--page-muted);
+}
+
+.place-page h1 {
+  margin: 6px 0 4px;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  line-height: 1.15;
+}
+
+.place-page__where {
+  margin: 0 0 10px;
+  color: var(--page-muted);
+  font-size: 1.05rem;
+}
+
+.mini-map {
+  height: 280px;
+  margin: 16px 0 24px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #dfe6ee;
+}
+
+.mini-map--loading {
+  background: linear-gradient(90deg, #dfe6ee, #edf1f5, #dfe6ee);
+}
+
+.place-page__section h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.place-page .hint {
+  color: var(--page-muted);
+}
+
+.link-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.link-list a {
+  display: inline-block;
+  padding: 8px 0;
+}
