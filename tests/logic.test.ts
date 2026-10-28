@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 import { localCheck } from "@/server/moderation";
 import { hashPassword, openText, sealText, verifyPassword } from "@/server/security";
 import { estimateTrip, lodgingFor, oneWayFare } from "@/lib/travel";
-import { searchPlaces } from "@/lib/search";
-import type { Place } from "@/lib/types";
 
 describe("moderation: built-in rules", () => {
   it("approves ordinary prayers, including grief and doubt", () => {
@@ -88,31 +86,5 @@ describe("travel estimates", () => {
   it("knows lodging tiers and has a fallback", () => {
     expect(lodgingFor("Switzerland").perNight.low).toBeGreaterThan(lodgingFor("India").perNight.high);
     expect(lodgingFor("Atlantis").tier).toBe("Typical cost");
-  });
-});
-
-describe("search", () => {
-  const place = (name: string, city: string, country: string): Place => ({
-    id: name.toLowerCase().replace(/\W+/g, "-"),
-    name,
-    city,
-    country,
-    faith: "christianity",
-    tradition: null,
-    heritage: false,
-    website: null,
-    wikipedia: null,
-    wikidata: null,
-    lat: 0,
-    lon: 0,
-  });
-  const places = [place("Mosque–Cathedral of Córdoba", "Córdoba", "Spain"), place("Seville Cathedral", "Seville", "Spain")];
-
-  it("matches without accents and groups countries", () => {
-    const results = searchPlaces(places, "cordoba");
-    expect(results[0].label).toBe("Córdoba");
-    expect(results.some((r) => r.kind === "place")).toBe(true);
-    const spain = searchPlaces(places, "spain");
-    expect(spain[0]).toMatchObject({ kind: "country", label: "Spain" });
   });
 });

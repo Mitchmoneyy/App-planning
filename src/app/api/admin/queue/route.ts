@@ -2,12 +2,15 @@
 import { getStore } from "@/server/db";
 import { requireAdmin } from "@/server/auth";
 import { getIdentity, handle, privateJson } from "@/server/http";
-import { getPlace } from "@/lib/places.server";
+import { findPlace, placeNames } from "@/lib/places.server";
 
 export const GET = handle(async () => {
   await requireAdmin(await getIdentity());
-  const { prayers, reviews, worldPrayers, requests } = await getStore().listModerationQueue();
-  const placeName = (id: string) => getPlace(id)?.name ?? id;
+  const store = getStore();
+  const { prayers, reviews, worldPrayers, requests } = await store.listModerationQueue();
+  const suggestions = await store.listPendingSuggestions();
+  const names = await placeNames([...prayers.map((p) => p.placeId), ...reviews.map((r) => r.placeId)]);
+  const placeName = (id: string) => names.get(id) ?? id;
   return privateJson({
     prayers: prayers.map((p) => ({
       id: p.id,
@@ -50,5 +53,22 @@ export const GET = handle(async () => {
       reports: r.reportCount,
       createdAt: r.createdAt,
     })),
+    suggestions: await Promise.all(
+      suggestions.map(async (s) => ({
+        id: s.id,
+        kind: s.kind,
+        placeId: s.placeId,
+        placeName: s.placeId ? ((await findPlace(s.placeId))?.name ?? s.placeId) : null,
+        name: s.name,
+        faith: s.faith,
+        tradition: s.tradition,
+        address: s.address,
+        lat: s.lat,
+        lon: s.lon,
+        website: s.website,
+        note: s.note,
+        createdAt: s.createdAt,
+      })),
+    ),
   });
 });

@@ -4,7 +4,7 @@ import { getMapillaryPanoramas, getStreetView } from "@/server/immersive";
 import { getPlaceInfo } from "@/server/wikimedia";
 
 export const GET = handle(async (_req: Request, ctx: RouteContext<"/api/places/[id]/immersive">) => {
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const [streetView, mapillary, info] = await Promise.all([getStreetView(place), getMapillaryPanoramas(place), getPlaceInfo(place)]);
   return Response.json(
     { streetView, panoramas: [...info.panoramas, ...mapillary] },

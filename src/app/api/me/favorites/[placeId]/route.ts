@@ -9,7 +9,7 @@ import { rateLimit } from "@/server/rateLimit";
 
 async function setFavorite(req: Request, ctx: RouteContext<"/api/me/favorites/[placeId]">, on: boolean) {
   assertSameOrigin(req);
-  const place = requirePlace((await ctx.params).placeId);
+  const place = await requirePlace((await ctx.params).placeId);
   const who = await getIdentity();
   if (!rateLimit(`fav:${actorKey(who)}`, 120, 60 * 60 * 1000)) throw new HttpError(429, "Please slow down a little.");
   await getStore().setFavorite(actorKey(who), place.id, on);

@@ -29,7 +29,7 @@ export function WorldPrayerItem({ prayer, onHidden }: { prayer: WorldPrayerView;
           {" "}
           ⟶{" "}
         </span>
-        <button type="button" className="link-button" onClick={() => globe?.flyTo(prayer.target.lat, prayer.target.lon, prayer.target.kind === "city" ? 0.4 : 1.1)}>
+        <button type="button" className="link-button" onClick={() => globe?.flyTo(prayer.target.lat, prayer.target.lon, prayer.target.kind === "city" ? 9 : 4.5)}>
           <span aria-hidden="true">{flag(prayer.target.cc)}</span> {areaText(prayer.target)}
         </button>
       </p>
@@ -86,7 +86,7 @@ export function RequestCard({ request, onChange, onHidden }: { request: RequestV
   return (
     <li className="req">
       <p className="req__where">
-        <button type="button" className="link-button" onClick={() => globe?.flyTo(request.area.lat, request.area.lon, 0.5)}>
+        <button type="button" className="link-button" onClick={() => globe?.flyTo(request.area.lat, request.area.lon, request.area.kind === "city" ? 9 : 4.5)}>
           <span aria-hidden="true">{flag(request.area.cc)}</span> {areaText(request.area)}
         </button>
         <span className="muted"> · {timeAgo(request.createdAt)}</span>

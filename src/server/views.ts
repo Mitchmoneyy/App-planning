@@ -4,7 +4,6 @@ import type { AreaRef, PrayerRecord, PrayerRequestRecord, ReviewRecord, WorldPra
 import { countryName } from "@/lib/cities";
 import { faithOptionLabel } from "@/lib/blessings";
 import { openText } from "./security";
-import { getPlace } from "@/lib/places.server";
 import type { ActivityItem, AreaView, OwnPrayer, RequestView, ReviewView, WallPrayer, WorldPrayerView } from "@/lib/apiTypes";
 
 /** Public wall entry: no owner ids, name only if not anonymous. */
@@ -27,10 +26,10 @@ const STATUS_LABEL: Record<PrayerRecord["status"], string> = {
 };
 
 /** The author's own view, including private prayers (decrypted). */
-export const toOwnPrayer = (p: PrayerRecord): OwnPrayer => ({
+export const toOwnPrayer = (p: PrayerRecord, placeName: string): OwnPrayer => ({
   id: p.id,
   placeId: p.placeId,
-  placeName: getPlace(p.placeId)?.name ?? "Unknown place",
+  placeName,
   body: openText(p.body),
   isPublic: p.isPublic,
   status: p.status,

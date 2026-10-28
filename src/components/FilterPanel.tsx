@@ -1,11 +1,14 @@
 "use client";
 
-/** Filters: faith, UNESCO World Heritage only, and distance from the user. */
+/** Filters: faith, famous landmarks only, and distance from the user. Applied on the map instantly. */
+import { useMemo } from "react";
 import { FAITHS, type FaithKey } from "@/lib/faiths";
+import { faithIconUrl } from "@/lib/map/icons";
 
 export interface Filters {
   /** Empty = all faiths. */
   faiths: FaithKey[];
+  /** Only famous landmarks (UNESCO sites, cathedrals, great mosques, temples…). */
   heritageOnly: boolean;
   /** null = any distance. */
   maxDistanceKm: number | null;
@@ -16,17 +19,18 @@ export const EMPTY_FILTERS: Filters = { faiths: [], heritageOnly: false, maxDist
 export const activeFilterCount = (f: Filters) =>
   f.faiths.length + (f.heritageOnly ? 1 : 0) + (f.maxDistanceKm !== null ? 1 : 0);
 
-const DISTANCES = [50, 250, 1000, 5000];
+const DISTANCES = [5, 25, 100, 500];
 
 interface Props {
   filters: Filters;
   onChange(filters: Filters): void;
   hasLocation: boolean;
-  resultCount: number;
   onClose(): void;
 }
 
-export default function FilterPanel({ filters, onChange, hasLocation, resultCount, onClose }: Props) {
+export default function FilterPanel({ filters, onChange, hasLocation, onClose }: Props) {
+  // Rendered only after a click, so the canvas-drawn icons never affect server HTML.
+  const icons = useMemo(() => Object.fromEntries(FAITHS.map((f) => [f.key, faithIconUrl(f.key)])), []);
   const toggleFaith = (key: FaithKey) =>
     onChange({
       ...filters,
@@ -49,7 +53,8 @@ export default function FilterPanel({ filters, onChange, hasLocation, resultCoun
             const on = filters.faiths.includes(f.key);
             return (
               <button key={f.key} type="button" className={`chip${on ? " is-on" : ""}`} aria-pressed={on} onClick={() => toggleFaith(f.key)}>
-                <span className="chip__dot" style={{ background: f.color }} aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element -- generated data URL */}
+                <img className="chip__icon" src={icons[f.key]} alt="" width={20} height={20} />
                 {f.label}
               </button>
             );
@@ -61,7 +66,7 @@ export default function FilterPanel({ filters, onChange, hasLocation, resultCoun
         <legend>Landmarks</legend>
         <label className="toggle">
           <input type="checkbox" checked={filters.heritageOnly} onChange={(e) => onChange({ ...filters, heritageOnly: e.target.checked })} />
-          UNESCO World Heritage sites only
+          Famous landmarks only
         </label>
       </fieldset>
 
@@ -88,7 +93,7 @@ export default function FilterPanel({ filters, onChange, hasLocation, resultCoun
 
       <footer className="filters__footer">
         <button type="button" className="primary-button" onClick={onClose}>
-          Show {resultCount.toLocaleString()} place{resultCount === 1 ? "" : "s"}
+          Done
         </button>
       </footer>
     </section>

@@ -6,7 +6,7 @@
 import { actorKey, getStore, senderActor } from "@/server/db";
 import { assertSameOrigin, getIdentity, handle, HttpError, privateJson, readJson } from "@/server/http";
 import { rateLimit } from "@/server/rateLimit";
-import { getPlace } from "@/lib/places.server";
+import { findPlace } from "@/lib/places.server";
 
 export const GET = handle(async () => {
   const who = await getIdentity();
@@ -33,7 +33,7 @@ export const POST = handle(async (req: Request) => {
     if (r) [author, label] = [`u:${r.userId}`, `Someone who asked for prayers in ${r.area.name}`];
   } else if (kind === "church_prayer") {
     const p = await store.getPrayer(id);
-    if (p) [author, label] = [senderActor(p), `Someone who prayed at ${getPlace(p.placeId)?.name ?? "a place of worship"}`];
+    if (p) [author, label] = [senderActor(p), `Someone who prayed at ${(await findPlace(p.placeId))?.name ?? "a place of worship"}`];
   } else {
     throw new HttpError(400, "Invalid request.");
   }

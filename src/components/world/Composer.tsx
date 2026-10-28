@@ -45,7 +45,7 @@ export default function Composer({ onSent }: { onSent?(p: WorldPrayerView): void
       setTarget(area);
       setResult(null);
       setPick(area ? { lat: area.lat, lon: area.lon, label: area.kind === "city" ? area.name : area.country } : null);
-      if (area) globe?.flyTo(area.lat, area.lon, area.kind === "city" ? 0.9 : 1.5, 1600);
+      if (area) globe?.flyTo(area.lat, area.lon, area.kind === "city" ? 6 : 4, 1800);
     },
     [globe, setPick],
   );
@@ -91,7 +91,7 @@ export default function Composer({ onSent }: { onSent?(p: WorldPrayerView): void
           to: { lat: target.lat, lon: target.lon, label: target.name },
           createdAt: new Date().toISOString(),
         });
-        if (origin) globe?.flyTo((origin.lat + target.lat) / 2, (origin.lon + target.lon) / 2, 2.2, 1800);
+        if (origin) globe?.flyTo((origin.lat + target.lat) / 2, (origin.lon + target.lon) / 2, 1.6, 2000);
         window.setTimeout(refreshActivity, 2500);
         onSent?.(res.prayer);
       }

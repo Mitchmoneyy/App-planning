@@ -3,7 +3,7 @@ import { handle, requirePlace } from "@/server/http";
 import { getPlaceInfo } from "@/server/wikimedia";
 
 export const GET = handle(async (_req: Request, ctx: RouteContext<"/api/places/[id]/info">) => {
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const info = await getPlaceInfo(place);
   return Response.json(info, {
     headers: {

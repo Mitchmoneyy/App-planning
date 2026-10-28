@@ -62,6 +62,8 @@ create table if not exists candles (
   actor      text not null,
   created_at timestamptz not null default now()
 );
+-- Which gesture: candle, diya, dua, incense, … (src/lib/gestures.ts)
+alter table candles add column if not exists kind text not null default 'candle';
 create index if not exists candles_place_idx on candles(place_id, created_at desc);
 create index if not exists candles_actor_idx on candles(actor, place_id, created_at desc);
 
@@ -235,3 +237,26 @@ alter table blocks enable row level security;
 alter table notifications enable row level security;
 alter table user_settings enable row level security;
 alter table push_subscriptions enable row level security;
+
+-- Suggested corrections and new places from users, reviewed by moderators.
+create table if not exists place_suggestions (
+  id          uuid primary key default gen_random_uuid(),
+  kind        text not null check (kind in ('new', 'correction', 'closed', 'duplicate')),
+  place_id    text,
+  name        text,
+  faith       text,
+  tradition   text,
+  address     text,
+  lat         double precision,
+  lon         double precision,
+  website     text,
+  note        text,
+  owner_user  uuid references users(id) on delete set null,
+  owner_device text not null,
+  status      text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  moderation_note text,
+  created_at  timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+create index if not exists place_suggestions_status_idx on place_suggestions (status, created_at);
+alter table place_suggestions enable row level security;

@@ -31,6 +31,8 @@ import {
   type ReviewRecord,
   type ReviewStatus,
   type ReviewSummary,
+  type NewSuggestion,
+  type SuggestionRecord,
   type Store,
   type UserRecord,
 } from "./types";
@@ -40,7 +42,7 @@ interface Snapshot {
   reviews: ReviewRecord[];
   users: UserRecord[];
   sessions: { tokenHash: string; userId: string; expiresAt: string }[];
-  candles: { placeId: string; actor: string; at: string }[];
+  candles: { placeId: string; actor: string; at: string; kind?: string }[];
   prayedFor: { prayerId: string; actor: string }[];
   reports: { prayerId: string; actor: string; reason: string; at: string }[];
   favorites: { actor: string; placeId: string; at: string }[];
@@ -52,6 +54,7 @@ interface Snapshot {
   notifications: NotificationRecord[];
   settings: UserSettings[];
   pushSubs: PushSubscriptionRecord[];
+  suggestions: SuggestionRecord[];
 }
 
 const empty = (): Snapshot => ({
@@ -71,6 +74,7 @@ const empty = (): Snapshot => ({
   notifications: [],
   settings: [],
   pushSubs: [],
+  suggestions: [],
 });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -132,8 +136,8 @@ export class MemoryStore implements Store {
     return last ? new Date(last) : null;
   }
 
-  async lightCandle(placeId: string, actor: string) {
-    this.db.candles.push({ placeId, actor, at: new Date().toISOString() });
+  async lightCandle(placeId: string, actor: string, kind = "candle") {
+    this.db.candles.push({ placeId, actor, at: new Date().toISOString(), kind });
     this.save();
   }
 
@@ -280,6 +284,28 @@ export class MemoryStore implements Store {
       worldPrayers: this.db.worldPrayers.filter((p) => queued.has(p.status)).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
       requests: this.db.requests.filter((r) => queued.has(r.status)).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     };
+  }
+
+  // --- Place suggestions ---
+
+  async createSuggestion(input: NewSuggestion) {
+    const s: SuggestionRecord = { ...input, id: randomUUID(), status: "pending", moderationNote: null, createdAt: new Date().toISOString() };
+    this.db.suggestions.push(s);
+    this.save();
+    return { ...s };
+  }
+
+  async listPendingSuggestions() {
+    return this.db.suggestions.filter((s) => s.status === "pending").sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async setSuggestionStatus(id: string, status: "approved" | "rejected", note: string | null) {
+    const s = this.db.suggestions.find((x) => x.id === id);
+    if (s) {
+      s.status = status;
+      s.moderationNote = note;
+      this.save();
+    }
   }
 
   // --- Accounts ---

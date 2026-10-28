@@ -1,0 +1,278 @@
+/* Devotional gestures: quiet, warm, unhurried. Motion is reduced when asked. */
+
+.offering {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.offering__choices {
+  justify-content: center;
+}
+
+.offering__stage {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  display: grid;
+  place-items: end center;
+}
+
+.offering__others {
+  position: absolute;
+  inset: auto 0 6px 0;
+  height: 40px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.offering__others span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffd38a;
+  box-shadow: 0 0 10px 3px rgba(255, 196, 110, 0.45);
+  animation: flicker 2.4s infinite ease-in-out;
+}
+
+.offering__about {
+  max-width: 34ch;
+  margin: 0;
+  font-size: 0.86rem;
+  opacity: 0.78;
+}
+
+.art {
+  width: 180px;
+  height: 165px;
+  overflow: visible;
+}
+
+/* Flame (diya, butter lamp): unlit until offered */
+.flame {
+  opacity: 0;
+  transform-origin: 60px 50px;
+  transition: opacity 1.2s ease;
+}
+.is-done .flame {
+  opacity: 1;
+  animation: flame-sway 2.6s infinite ease-in-out;
+}
+.flame__glow {
+  fill: rgba(255, 190, 90, 0.28);
+  filter: blur(8px);
+}
+.flame__outer {
+  fill: #ffb347;
+}
+.flame__inner {
+  fill: #fff4cf;
+}
+@keyframes flame-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg) scaleY(1);
+  }
+  50% {
+    transform: rotate(2deg) scaleY(1.06);
+  }
+}
+
+.clay {
+  fill: #b5562b;
+}
+.clay--rim {
+  fill: #d77a43;
+}
+.brass {
+  fill: #c99a3e;
+}
+
+/* Incense: smoke rises once lit */
+.stick {
+  fill: #6b3d22;
+}
+.ember {
+  fill: #5a3020;
+  transition: fill 0.8s;
+}
+.is-done .ember {
+  fill: #ff7a2f;
+  filter: drop-shadow(0 0 4px #ff9a4a);
+}
+.smoke path {
+  fill: none;
+  stroke: rgba(230, 230, 240, 0.55);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 90;
+  stroke-dashoffset: 90;
+  opacity: 0;
+}
+.is-done .smoke path {
+  animation: smoke 4.5s infinite ease-out;
+}
+.is-done .smoke path:nth-child(2) {
+  animation-delay: 1.6s;
+}
+@keyframes smoke {
+  0% {
+    stroke-dashoffset: 90;
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+/* Flowers: drift down and settle */
+.petal {
+  fill: #f4a020;
+}
+.bloom:nth-child(2) .petal {
+  fill: #f6d0d8;
+}
+.bloom__heart {
+  fill: #c2410c;
+}
+.leaf {
+  fill: #3f7d4e;
+}
+.bloom {
+  opacity: 0.25;
+  transition: opacity 0.6s;
+}
+.is-done .bloom {
+  opacity: 1;
+  animation: settle 1.4s ease-out both;
+}
+@keyframes settle {
+  from {
+    translate: 0 -60px;
+    opacity: 0;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+/* Ema: written, then hung and gently swinging */
+.cord {
+  stroke: #b91c1c;
+  stroke-width: 2;
+}
+.wood {
+  fill: #d9b27c;
+  stroke: #9a6b35;
+  stroke-width: 2;
+}
+.ink {
+  stroke: #3b2a1a;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+}
+.ema {
+  transform-origin: 60px 22px;
+}
+.is-done .ink {
+  animation: write 1.4s ease forwards;
+}
+.is-done .ema {
+  animation: swing 3.4s 1.2s infinite ease-in-out;
+}
+@keyframes write {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes swing {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Prayer note placed in a stone wall */
+.stone {
+  fill: #c9b48f;
+}
+.stone-line {
+  stroke: #a38e68;
+  stroke-width: 2;
+}
+.paper {
+  fill: #fffaf0;
+  stroke: #d8cbb0;
+}
+.note {
+  opacity: 0;
+  translate: 0 30px;
+  transition: opacity 0.8s, translate 1.2s ease-out;
+}
+.is-done .note {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Dua and simple prayer: a soft light that brightens */
+.soft-light {
+  fill: rgba(255, 220, 150, 0.18);
+  filter: blur(10px);
+  transition: fill 1.4s;
+}
+.is-done .soft-light {
+  fill: rgba(255, 220, 150, 0.5);
+  animation: offer-breathe 4s infinite ease-in-out;
+}
+.hand {
+  fill: rgba(255, 236, 200, 0.92);
+  stroke: rgba(214, 170, 100, 0.9);
+  stroke-width: 1.5;
+}
+.orb {
+  fill: rgba(255, 240, 210, 0.6);
+  transition: fill 1.2s;
+}
+.is-done .orb {
+  fill: #fff3d6;
+  filter: drop-shadow(0 0 12px #ffd38a);
+}
+@keyframes offer-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The CSS candle (globals.css) is unlit until offered here */
+.offering__stage.is-candle:not(.is-done) .candle__flame,
+.offering__stage.is-candle:not(.is-done) .candle__glow {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offering *,
+  .offering *::before,
+  .offering *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -56,6 +56,28 @@ export interface ReviewRecord {
   updatedAt: string;
 }
 
+/** A user's suggested new place, correction, closure or duplicate (reviewed by moderators). */
+export type SuggestionKind = "new" | "correction" | "closed" | "duplicate";
+export interface SuggestionRecord {
+  id: string;
+  kind: SuggestionKind;
+  placeId: string | null;
+  name: string | null;
+  faith: string | null;
+  tradition: string | null;
+  address: string | null;
+  lat: number | null;
+  lon: number | null;
+  website: string | null;
+  note: string | null;
+  ownerUser: string | null;
+  ownerDevice: string;
+  status: "pending" | "approved" | "rejected";
+  moderationNote: string | null;
+  createdAt: string;
+}
+export type NewSuggestion = Omit<SuggestionRecord, "id" | "status" | "moderationNote" | "createdAt">;
+
 export interface UserRecord {
   id: string;
   email: string;
@@ -210,7 +232,8 @@ export interface Store {
   // --- Candles & counts ---
   getPlaceStats(placeId: string): Promise<PlaceStats>;
   lastCandleAt(placeId: string, actor: string): Promise<Date | null>;
-  lightCandle(placeId: string, actor: string): Promise<void>;
+  /** Record a devotional gesture (candle, diya, dua, …; see src/lib/gestures.ts). */
+  lightCandle(placeId: string, actor: string, kind?: string): Promise<void>;
 
   // --- Prayers ---
   createPrayer(prayer: NewPrayer): Promise<PrayerRecord>;
@@ -242,6 +265,11 @@ export interface Store {
 
   // --- Moderation queue ---
   listModerationQueue(): Promise<{ prayers: PrayerRecord[]; reviews: ReviewRecord[]; worldPrayers: WorldPrayerRecord[]; requests: PrayerRequestRecord[] }>;
+
+  // --- Place suggestions (new places, corrections) ---
+  createSuggestion(s: NewSuggestion): Promise<SuggestionRecord>;
+  listPendingSuggestions(): Promise<SuggestionRecord[]>;
+  setSuggestionStatus(id: string, status: "approved" | "rejected", note: string | null): Promise<void>;
 
   // --- Accounts ---
   createUser(user: Omit<UserRecord, "id" | "createdAt">): Promise<UserRecord>;

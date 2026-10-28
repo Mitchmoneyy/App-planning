@@ -37,10 +37,10 @@ export default function HomeWelcome() {
       <h2>A sanctuary for the whole world</h2>
       <ul>
         <li>
-          <span aria-hidden="true">✦</span> Spin the globe and tap a light to arrive at a place of worship.
+          <span aria-hidden="true">✦</span> Zoom from space down to the street to find places of worship of every faith.
         </li>
         <li>
-          <span aria-hidden="true">🕯</span> Light a candle or leave a prayer there, from wherever you are.
+          <span aria-hidden="true">✦</span> Pray there in the way of its tradition: a candle, a diya, flowers, incense, dua or a simple prayer.
         </li>
         <li>
           <span aria-hidden="true">✧</span> <Link href="/world">Send a prayer or blessing</Link> to any city, and see the prayers travelling.

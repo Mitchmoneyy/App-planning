@@ -23,6 +23,14 @@ export interface PlaceProperties {
 export interface Place extends PlaceProperties {
   lat: number;
   lon: number;
+  /** Street address, when a source has one. */
+  address?: string | null;
+  /** ISO country code. */
+  cc?: string | null;
+  /** A well-known landmark (shown from space). */
+  landmark?: boolean;
+  /** Building outline, for the highlight. */
+  footprint?: GeoJSON.Geometry | null;
 }
 
 export interface PlaceFeature {

@@ -5,7 +5,8 @@
  *
  * 1. The globe flies down from space to the place.
  * 2. The view cross-fades into the best available look-around:
- *    Street View → 360° panorama → photo slideshow → 3D map.
+ *    Street View → 360° panorama → Google photorealistic 3D → photo
+ *    slideshow → aerial (the live globe itself, at the glowing building).
  * 3. Info and prayer panels float over it; "Back to globe" rises to space again.
  */
 import Link from "next/link";
@@ -13,13 +14,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useGlobe } from "../globe/GlobeContext";
 import FavoriteButton from "../FavoriteButton";
-import { Candle, PrayerForm, PrayerWall } from "../PrayerSpace";
+import Offering from "../Offering";
+import { PrayerForm, PrayerWall } from "../PrayerSpace";
 import Reviews from "../Reviews";
-import ImmersiveMap from "./ImmersiveMap";
 import { AboutPanel, PhotosPanel, VisitPanel } from "./InfoPanels";
 import KenBurns from "./KenBurns";
 import LiveChips from "./LiveChips";
 import PanoramaViewer from "./PanoramaViewer";
+import Photoreal3D, { photorealAvailable } from "./Photoreal3D";
 import SoundControl from "./SoundControl";
 import { usePlaceInfo } from "@/hooks/usePlaceInfo";
 import { usePlaceStats } from "@/hooks/usePlaceStats";
@@ -38,7 +40,12 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "reviews", label: "Reviews" },
 ];
 
-type Source = { key: string; kind: "streetview"; label: string } | { key: string; kind: "pano"; label: string; pano: Panorama } | { key: string; kind: "photos"; label: string } | { key: string; kind: "map"; label: string };
+type Source =
+  | { key: string; kind: "streetview"; label: string }
+  | { key: string; kind: "pano"; label: string; pano: Panorama }
+  | { key: string; kind: "photoreal"; label: string }
+  | { key: string; kind: "photos"; label: string }
+  | { key: string; kind: "aerial"; label: string };
 
 export default function Immersive({ place }: { place: Place }) {
   const router = useRouter();
@@ -62,11 +69,9 @@ export default function Immersive({ place }: { place: Place }) {
     if (!globe) return;
     let cancelled = false;
     globe.setPaused(false);
-    globe.flyIn(place.lat, place.lon).then(() => {
+    globe.flyIn({ id: place.id, lat: place.lat, lon: place.lon, footprint: place.footprint }).then(() => {
       if (cancelled) return;
       setPhase("arrived");
-      // Once the view has faded in, stop drawing the hidden globe.
-      window.setTimeout(() => !cancelled && !leaving.current && globe.setPaused(true), 1200);
     });
     return () => {
       cancelled = true;
@@ -74,7 +79,7 @@ export default function Immersive({ place }: { place: Place }) {
       globe.setPaused(false);
       if (!leaving.current) globe.flyOut();
     };
-  }, [globe, place.id, place.lat, place.lon]);
+  }, [globe, place.id, place.lat, place.lon, place.footprint]);
 
   // ---- What can we show? -----------------------------------------------------
   useEffect(() => {
@@ -91,8 +96,9 @@ export default function Immersive({ place }: { place: Place }) {
     const list: Source[] = [];
     if (views?.streetView) list.push({ key: "streetview", kind: "streetview", label: "Street View" });
     views?.panoramas.forEach((pano, i) => list.push({ key: `pano-${i}`, kind: "pano", label: views.panoramas.length > 1 ? `360° view ${i + 1}` : "360° view", pano }));
+    if (photorealAvailable()) list.push({ key: "photoreal", kind: "photoreal", label: "3D" });
     if (info && info.photos.length > 0) list.push({ key: "photos", kind: "photos", label: "Photos" });
-    list.push({ key: "map", kind: "map", label: "Map" });
+    list.push({ key: "aerial", kind: "aerial", label: "Aerial" });
     return list.filter((s) => !failed.has(s.key));
   }, [views, info, failed]);
 
@@ -104,6 +110,16 @@ export default function Immersive({ place }: { place: Place }) {
     return () => clearTimeout(t);
   }, []);
   const current = sources.find((s) => s.key === sourceKey) ?? (ready || waitedLongEnough ? sources[0] : null);
+  const aerial = current?.kind === "aerial";
+  const markFailed = useCallback((key: string) => setFailed((f) => new Set(f).add(key)), []);
+  const failPhotoreal = useCallback(() => markFailed("photoreal"), [markFailed]);
+
+  // Stop animating the globe while another view covers it.
+  useEffect(() => {
+    if (!globe || phase !== "arrived") return;
+    const t = window.setTimeout(() => !leaving.current && globe.setPaused(!aerial), 1200);
+    return () => window.clearTimeout(t);
+  }, [globe, phase, aerial]);
 
   const back = useCallback(async () => {
     if (leaving.current) return;
@@ -127,7 +143,7 @@ export default function Immersive({ place }: { place: Place }) {
   const where = [place.city, place.country].filter(Boolean).join(", ");
 
   return (
-    <div className={`immersive is-${phase}`}>
+    <div className={`immersive is-${phase}${aerial ? " is-aerial" : ""}`}>
       {/* While flying: a quiet title over the globe */}
       <div className="arriving" aria-live="polite">
         <p className="eyebrow">Arriving at</p>
@@ -148,10 +164,10 @@ export default function Immersive({ place }: { place: Place }) {
           />
         )}
         {current?.kind === "pano" && (
-          <PanoramaViewer key={current.key} url={current.pano.url} onFail={() => setFailed((f) => new Set(f).add(current.key))} />
+          <PanoramaViewer key={current.key} url={current.pano.url} onFail={() => markFailed(current.key)} />
         )}
+        {current?.kind === "photoreal" && <Photoreal3D lat={place.lat} lon={place.lon} name={place.name} onFail={failPhotoreal} />}
         {current?.kind === "photos" && info && <KenBurns photos={info.photos} onIndex={setSlide} />}
-        {current?.kind === "map" && <ImmersiveMap lat={place.lat} lon={place.lon} color={faithColor(place.faith)} />}
         <div className="immersive__shade" />
       </div>
 
@@ -206,7 +222,7 @@ export default function Immersive({ place }: { place: Place }) {
                 setPanelOpen(true);
               }}
             >
-              {t.key === "pray" && <span aria-hidden="true">🕯 </span>}
+              {t.key === "pray" && <span aria-hidden="true">✦ </span>}
               {t.label}
             </button>
           ))}
@@ -227,7 +243,7 @@ export default function Immersive({ place }: { place: Place }) {
             )}
             {tab === "pray" && (
               <div className="ipanel__body pray-panel">
-                <Candle placeId={place.id} stats={stats} onStats={setStats} />
+                <Offering placeId={place.id} faith={place.faith} tradition={place.tradition} stats={stats} onStats={setStats} />
                 <PrayerForm placeId={place.id} onPosted={() => setWallKey((k) => k + 1)} />
                 <PrayerWall key={wallKey} placeId={place.id} />
               </div>
@@ -251,7 +267,8 @@ export default function Immersive({ place }: { place: Place }) {
 function ViewCredit({ source, photo }: { source: Source | undefined | null; photo: { author: string | null; license: string | null; sourceUrl: string; title: string } | null }) {
   if (!source) return null;
   if (source.kind === "streetview") return <p className="view-credit">Imagery © Google Street View</p>;
-  if (source.kind === "map") return <p className="view-credit">Map © OpenStreetMap contributors, OpenFreeMap</p>;
+  if (source.kind === "aerial") return <p className="view-credit">Aerial view · drag to look around, right-drag to tilt</p>;
+  if (source.kind === "photoreal") return <p className="view-credit">Photorealistic 3D · Google</p>;
   if (source.kind === "pano") {
     const p = source.pano;
     return (

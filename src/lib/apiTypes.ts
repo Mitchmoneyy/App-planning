@@ -130,3 +130,8 @@ export interface BlockView {
   label: string;
   createdAt: string;
 }
+
+/** A search result: a place of worship, a city or a country. */
+export type SearchHit =
+  | { kind: "place"; id: string; name: string; faith: import("./faiths").FaithKey; lat: number; lon: number; detail: string; landmark?: boolean }
+  | { kind: "city" | "country"; name: string; detail: string; lat: number; lon: number; cc: string };

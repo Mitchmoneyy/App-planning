@@ -9,7 +9,7 @@ import { unstable_rethrow } from "next/navigation";
 import { connection } from "next/server";
 import { getStore, type Identity } from "./db";
 import { hashToken } from "./security";
-import { getPlace } from "@/lib/places.server";
+import { findPlace } from "@/lib/places.server";
 
 export const DEVICE_COOKIE = "gs_device";
 export const SESSION_COOKIE = "gs_session";
@@ -89,8 +89,8 @@ export async function readJson<T = Record<string, unknown>>(req: Request, maxByt
   }
 }
 
-export function requirePlace(id: string) {
-  const place = getPlace(id);
+export async function requirePlace(id: string) {
+  const place = await findPlace(id);
   if (!place) throw new HttpError(404, "We couldn't find that place.");
   return place;
 }

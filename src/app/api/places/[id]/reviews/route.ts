@@ -11,7 +11,7 @@ import { rateLimit } from "@/server/rateLimit";
 import { toReviewView } from "@/server/views";
 
 export const GET = handle(async (_req: Request, ctx: RouteContext<"/api/places/[id]/reviews">) => {
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const who = await getIdentity();
   const store = getStore();
   const [all, summary, mine, blocked] = await Promise.all([
@@ -30,7 +30,7 @@ export const GET = handle(async (_req: Request, ctx: RouteContext<"/api/places/[
 
 export const POST = handle(async (req: Request, ctx: RouteContext<"/api/places/[id]/reviews">) => {
   assertSameOrigin(req);
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const who = await getIdentity();
   const user = await requireUser(who);
   const body = await readJson<{ rating?: unknown; text?: unknown }>(req);
@@ -67,7 +67,7 @@ export const POST = handle(async (req: Request, ctx: RouteContext<"/api/places/[
 
 export const DELETE = handle(async (req: Request, ctx: RouteContext<"/api/places/[id]/reviews">) => {
   assertSameOrigin(req);
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const user = await requireUser(await getIdentity());
   await getStore().deleteReview(place.id, user.id);
   return privateJson({ ok: true });

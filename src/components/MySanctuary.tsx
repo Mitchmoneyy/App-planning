@@ -8,14 +8,14 @@ import BlockedList from "./me/BlockedList";
 import WorldHistory from "./me/WorldHistory";
 import WorldSettings from "./me/WorldSettings";
 import { useMe } from "./MeProvider";
-import { usePlaces } from "@/hooks/usePlaces";
+import { usePlacesById } from "@/hooks/usePlaces";
 import type { OwnPrayer } from "@/lib/apiTypes";
 import { api, timeAgo } from "@/lib/client";
 import { faithColor, faithLabel } from "@/lib/faiths";
 
 export default function MySanctuary() {
   const { me, loading, refresh, setFavorite } = useMe();
-  const places = usePlaces();
+  const places = usePlacesById(me?.favorites ?? []);
   const router = useRouter();
   const [prayers, setPrayers] = useState<OwnPrayer[] | null>(null);
 

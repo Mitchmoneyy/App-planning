@@ -3,15 +3,13 @@
 /** Shared state between the always-mounted globe and the screens over it. */
 import { createContext, useContext } from "react";
 import type { ActivityItem } from "@/lib/apiTypes";
-import type { LngLat, Place } from "@/lib/types";
+import type { LngLat } from "@/lib/types";
 import type { LocationStatus } from "@/hooks/useUserLocation";
-import type { GlobeApi } from "./GlobeCanvas";
+import type { GlobeApi } from "./GlobeMap";
 
 export interface GlobeContextValue {
   /** null until the globe has loaded. */
   api: GlobeApi | null;
-  places: Place[];
-  placeById: Map<string, Place>;
   location: LngLat | null;
   locationStatus: LocationStatus;
   requestLocation(): void;

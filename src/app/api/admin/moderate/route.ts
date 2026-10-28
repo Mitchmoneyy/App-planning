@@ -14,6 +14,7 @@ export const POST = handle(async (req: Request) => {
   if (kind === "prayer") await store.setPrayerStatus(id, action === "approve" ? "published" : "rejected", note);
   else if (kind === "review") await store.setReviewStatus(id, action === "approve" ? "published" : "rejected", note);
   else if (kind === "world_prayer") await store.setWorldPrayerStatus(id, action === "approve" ? "published" : "rejected", note);
+  else if (kind === "suggestion") await store.setSuggestionStatus(id, action === "approve" ? "approved" : "rejected", note);
   else if (kind === "request") await store.updateRequest(id, { status: action === "approve" ? "published" : "rejected", moderationNote: note });
   else throw new HttpError(400, "Invalid request.");
   return privateJson({ ok: true });

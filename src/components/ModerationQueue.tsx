@@ -19,9 +19,27 @@ interface QueueItem {
   name?: string;
 }
 
+interface SuggestionItem {
+  id: string;
+  kind: "new" | "correction" | "closed" | "duplicate";
+  placeId: string | null;
+  placeName: string | null;
+  name: string | null;
+  faith: string | null;
+  tradition: string | null;
+  address: string | null;
+  lat: number | null;
+  lon: number | null;
+  website: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
+const SUGGESTION_LABEL = { new: "New place", correction: "Correction", closed: "Reported closed", duplicate: "Reported duplicate" } as const;
+
 export default function ModerationQueue() {
   const { me, loading } = useMe();
-  const [queue, setQueue] = useState<{ prayers: QueueItem[]; reviews: QueueItem[]; worldPrayers: QueueItem[]; requests: QueueItem[] } | null>(null);
+  const [queue, setQueue] = useState<{ prayers: QueueItem[]; reviews: QueueItem[]; worldPrayers: QueueItem[]; requests: QueueItem[]; suggestions: SuggestionItem[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -36,7 +54,7 @@ export default function ModerationQueue() {
     if (me?.user?.isAdmin) load();
   }, [me, load]);
 
-  type Kind = "prayer" | "review" | "world_prayer" | "request";
+  type Kind = "prayer" | "review" | "world_prayer" | "request" | "suggestion";
   async function act(kind: Kind, id: string, action: "approve" | "remove") {
     await api("/api/admin/moderate", { body: { kind, id, action } });
     load();
@@ -91,6 +109,55 @@ export default function ModerationQueue() {
       {section("request", queue.requests, "Prayer requests")}
       {section("prayer", queue.prayers, "Prayers at places of worship")}
       {section("review", queue.reviews, "Reviews")}
+      <section className="card">
+        <h2>Place suggestions ({queue.suggestions.length})</h2>
+        <p className="hint">Approved suggestions are applied in the next data pipeline run (see pipeline/README.md).</p>
+        {queue.suggestions.length === 0 && <p className="muted">Nothing waiting. 🌿</p>}
+        <ul className="queue">
+          {queue.suggestions.map((s) => (
+            <li key={s.id}>
+              <p className="queue__meta">
+                <strong>{SUGGESTION_LABEL[s.kind]}</strong>
+                {s.placeId && (
+                  <>
+                    {" "}
+                    · <Link href={`/place/${encodeURIComponent(s.placeId)}`}>{s.placeName}</Link>
+                  </>
+                )}{" "}
+                · {timeAgo(s.createdAt)}
+              </p>
+              <dl className="facts">
+                {(
+                  [
+                    ["Name", s.name],
+                    ["Faith", s.faith],
+                    ["Tradition", s.tradition],
+                    ["Address", s.address],
+                    ["Location", s.lat != null && s.lon != null ? `${s.lat.toFixed(6)}, ${s.lon.toFixed(6)}` : null],
+                    ["Website", s.website],
+                    ["Note", s.note],
+                  ] as const
+                )
+                  .filter(([, v]) => v)
+                  .map(([k, v]) => (
+                    <div key={k}>
+                      <dt>{k}</dt>
+                      <dd>{v}</dd>
+                    </div>
+                  ))}
+              </dl>
+              <p className="link-row">
+                <button type="button" className="secondary-button" onClick={() => act("suggestion", s.id, "approve")}>
+                  Approve
+                </button>
+                <button type="button" className="danger-button" onClick={() => act("suggestion", s.id, "remove")}>
+                  Decline
+                </button>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

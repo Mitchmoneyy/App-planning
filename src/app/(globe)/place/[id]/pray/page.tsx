@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getAllPlaceIds } from "@/lib/places.server";
+import { getCuratedPlaceIds } from "@/lib/places.server";
 
 // The prayer space now lives inside the immersive view; keep old links working.
 export function generateStaticParams() {
-  return getAllPlaceIds().map((id) => ({ id }));
+  return getCuratedPlaceIds().map((id) => ({ id }));
 }
 
 export default async function PrayRedirect({ params }: PageProps<"/place/[id]/pray">) {

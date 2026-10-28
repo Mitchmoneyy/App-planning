@@ -36,7 +36,7 @@ export default function RequestPanel({ id }: { id: string }) {
   useEffect(() => {
     if (!request) return;
     setPick({ lat: request.area.lat, lon: request.area.lon, label: request.area.name });
-    globe?.flyTo(request.area.lat, request.area.lon, 1.2, 1800);
+    globe?.flyTo(request.area.lat, request.area.lon, request.area.kind === "city" ? 6 : 4, 2000);
     return () => setPick(null);
   }, [request, globe, setPick]);
 

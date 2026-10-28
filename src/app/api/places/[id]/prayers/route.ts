@@ -14,7 +14,7 @@ const PAGE_SIZE = 20;
 const MAX_LENGTH = 1000;
 
 export const GET = handle(async (req: Request, ctx: RouteContext<"/api/places/[id]/prayers">) => {
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const before = new URL(req.url).searchParams.get("before") ?? undefined;
   if (before && Number.isNaN(Date.parse(before))) throw new HttpError(400, "Invalid cursor.");
 
@@ -36,7 +36,7 @@ export const GET = handle(async (req: Request, ctx: RouteContext<"/api/places/[i
 
 export const POST = handle(async (req: Request, ctx: RouteContext<"/api/places/[id]/prayers">) => {
   assertSameOrigin(req);
-  const place = requirePlace((await ctx.params).id);
+  const place = await requirePlace((await ctx.params).id);
   const who = await getIdentity();
   const body = await readJson<{ text?: unknown; isPublic?: unknown; anonymous?: unknown; name?: unknown }>(req);
 

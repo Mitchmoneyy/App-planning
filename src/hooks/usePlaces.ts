@@ -1,28 +1,23 @@
 "use client";
 
-/** Loads the places dataset once per page (the browser caches the file). */
+/** Looks up a few places by id (any of the 1.5M+, not just landmarks). */
 import { useEffect, useState } from "react";
-import { featureToPlace, type Place, type PlaceCollection } from "@/lib/types";
+import { api } from "@/lib/client";
+import type { Place } from "@/lib/types";
 
-let promise: Promise<Map<string, Place>> | null = null;
-
-function loadPlaces() {
-  promise ??= fetch("/data/places.geojson")
-    .then((r) => r.json() as Promise<PlaceCollection>)
-    .then((d) => new Map(d.features.map((f) => [f.properties.id, featureToPlace(f)])))
-    .catch((err) => {
-      promise = null;
-      throw err;
-    });
-  return promise;
-}
-
-export function usePlaces() {
-  const [places, setPlaces] = useState<Map<string, Place> | null>(null);
+export function usePlacesById(ids: string[]) {
+  const key = [...new Set(ids)].sort().join(",");
+  const [places, setPlaces] = useState<{ key: string; map: Map<string, Place> } | null>(null);
   useEffect(() => {
-    loadPlaces()
-      .then(setPlaces)
-      .catch(() => setPlaces(new Map()));
-  }, []);
-  return places;
+    if (!key) return;
+    let alive = true;
+    api<{ places: Place[] }>(`/api/places/lookup?ids=${encodeURIComponent(key)}`)
+      .then((r) => alive && setPlaces({ key, map: new Map(r.places.map((p) => [p.id, p])) }))
+      .catch(() => alive && setPlaces({ key, map: new Map() }));
+    return () => {
+      alive = false;
+    };
+  }, [key]);
+  if (!key) return new Map<string, Place>();
+  return places?.key === key ? places.map : null;
 }

@@ -67,7 +67,7 @@ export default function AreaPanel() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch when the area changes
     load(area).catch(() => setData(null));
     setPick({ lat: area.lat, lon: area.lon, label: area.kind === "city" ? area.name : area.country });
-    globe?.flyTo(area.lat, area.lon, area.kind === "city" ? 1.4 : 1.8, 1800);
+    globe?.flyTo(area.lat, area.lon, area.kind === "city" ? 5.5 : 3.5, 2000);
     return () => setPick(null);
   }, [area, load, globe, setPick]);
 

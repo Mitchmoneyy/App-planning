@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-10-28T04:05:33.953Z",
+  "total": 36586,
+  "landmarks": 323,
+  "withFootprint": 3260,
+  "byFaith": {
+    "christianity": 24578,
+    "islam": 4603,
+    "judaism": 1162,
+    "hinduism": 1154,
+    "buddhism": 4412,
+    "sikhism": 224,
+    "shinto": 364,
+    "jainism": 17,
+    "bahai": 5,
+    "chinese": 6,
+    "zoroastrianism": 3,
+    "other": 58
+  },
+  "bySource": {
+    "curated": 323,
+    "overture": 36263
+  },
+  "merged": 1945,
+  "dropped": 116981,
+  "topCountries": {
+    "US": 10429,
+    "GB": 5453,
+    "MX": 4861,
+    "TH": 4109,
+    "TR": 2826,
+    "JP": 2319,
+    "FR": 2106,
+    "EG": 1539,
+    "IT": 1334,
+    "IN": 1039,
+    "IL": 200,
+    "PS": 80,
+    "VA": 3
+  }
+}

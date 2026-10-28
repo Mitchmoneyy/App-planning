@@ -13,6 +13,8 @@ import {
   type BlockRecord,
   type NewPrayerRequest,
   type NewWorldPrayer,
+  type NewSuggestion,
+  type SuggestionRecord,
   type NotificationRecord,
   type PrayerRequestRecord,
   type PushSubscriptionRecord,
@@ -146,6 +148,25 @@ const toSettings = (r: Row): UserSettings => ({
 /** SQL expression for the author of a world prayer, matching senderActor(). */
 const SENDER_ACTOR = "coalesce('u:' || sender_user::text, 'd:' || sender_device)";
 
+const toSuggestion = (r: postgres.Row): SuggestionRecord => ({
+  id: r.id as string,
+  kind: r.kind as SuggestionRecord["kind"],
+  placeId: (r.place_id as string) ?? null,
+  name: (r.name as string) ?? null,
+  faith: (r.faith as string) ?? null,
+  tradition: (r.tradition as string) ?? null,
+  address: (r.address as string) ?? null,
+  lat: r.lat === null ? null : Number(r.lat),
+  lon: r.lon === null ? null : Number(r.lon),
+  website: (r.website as string) ?? null,
+  note: (r.note as string) ?? null,
+  ownerUser: (r.owner_user as string) ?? null,
+  ownerDevice: r.owner_device as string,
+  status: r.status as SuggestionRecord["status"],
+  moderationNote: (r.moderation_note as string) ?? null,
+  createdAt: iso(r.created_at),
+});
+
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export class PostgresStore implements Store {
@@ -178,8 +199,8 @@ export class PostgresStore implements Store {
     return row?.at ? new Date(row.at) : null;
   }
 
-  async lightCandle(placeId: string, actor: string) {
-    await this.sql`insert into candles (place_id, actor) values (${placeId}, ${actor})`;
+  async lightCandle(placeId: string, actor: string, kind = "candle") {
+    await this.sql`insert into candles (place_id, actor, kind) values (${placeId}, ${actor}, ${kind})`;
   }
 
   // --- Prayers ---
@@ -315,6 +336,26 @@ export class PostgresStore implements Store {
     const world = await this.sql`select * from world_prayers where status in ('pending','hidden') order by created_at desc limit 200`;
     const requests = await this.sql`select * from prayer_requests where status in ('pending','hidden') order by created_at desc limit 200`;
     return { prayers: prayers.map(toPrayer), reviews: reviews.map(toReview), worldPrayers: world.map(toWorldPrayer), requests: requests.map(toRequest) };
+  }
+
+  // --- Place suggestions ---
+
+  async createSuggestion(s: NewSuggestion) {
+    const [row] = await this.sql`
+      insert into place_suggestions (kind, place_id, name, faith, tradition, address, lat, lon, website, note, owner_user, owner_device)
+      values (${s.kind}, ${s.placeId}, ${s.name}, ${s.faith}, ${s.tradition}, ${s.address}, ${s.lat}, ${s.lon}, ${s.website}, ${s.note}, ${s.ownerUser}, ${s.ownerDevice})
+      returning *`;
+    return toSuggestion(row);
+  }
+
+  async listPendingSuggestions() {
+    const rows = await this.sql`select * from place_suggestions where status = 'pending' order by created_at desc limit 200`;
+    return rows.map(toSuggestion);
+  }
+
+  async setSuggestionStatus(id: string, status: "approved" | "rejected", note: string | null) {
+    if (!isUuid(id)) return;
+    await this.sql`update place_suggestions set status = ${status}, moderation_note = ${note}, reviewed_at = now() where id = ${id}`;
   }
 
   // --- Accounts ---

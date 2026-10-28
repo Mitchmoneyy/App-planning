@@ -15,15 +15,20 @@ import NotificationBell from "../NotificationBell";
 import SearchBar from "../SearchBar";
 import { ThemeToggle, useTheme } from "../ThemeProvider";
 import { GlobeContext, type GlobeContextValue } from "./GlobeContext";
-import type { GlobeApi } from "./GlobeCanvas";
+import type { GlobeApi, GlobeFilters, PlaceSummary } from "./GlobeMap";
 import { useUserLocation } from "@/hooks/useUserLocation";
-import type { ActivityItem, AreaView } from "@/lib/apiTypes";
+import type { ActivityItem, AreaView, SearchHit } from "@/lib/apiTypes";
 import { api as fetchApi } from "@/lib/client";
-import { distanceKm } from "@/lib/geo";
-import { resultTarget, type SearchResult } from "@/lib/search";
-import { featureToPlace, type PlaceCollection } from "@/lib/types";
+import type { FaithKey } from "@/lib/faiths";
+import { mapProvider } from "@/lib/map/style";
 
-const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), { ssr: false, loading: () => <div className="globe-canvas" /> });
+const GlobeMap = dynamic(() => import("./GlobeMap"), { ssr: false, loading: () => <div className="globe-canvas" /> });
+
+const CREDITS = {
+  mapbox: "Imagery © Mapbox, Maxar · Night lights: NASA",
+  maptiler: "Imagery © MapTiler · Night lights: NASA",
+  free: "Imagery: NASA, Sentinel-2 cloudless by EOX",
+} as const;
 
 const ACTIVITY_POLL_MS = 30_000;
 
@@ -35,7 +40,6 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
   const { status: locationStatus, location, request: requestLocation } = useUserLocation();
 
   const [globeApi, setGlobeApi] = useState<GlobeApi | null>(null);
-  const [data, setData] = useState<PlaceCollection | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -46,32 +50,16 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
   const clickHandler = useRef<((lat: number, lon: number) => void) | null>(null);
   const centeredOnUser = useRef(false);
 
-  const placeMatch = pathname.match(/^\/place\/([^/]+)/);
-  const selectedId = placeMatch ? decodeURIComponent(placeMatch[1]) : null;
-  const immersive = Boolean(selectedId);
+  const immersive = /^\/place\/[^/]+/.test(pathname);
 
-  // ---- Places -----------------------------------------------------------------
-  useEffect(() => {
-    fetch("/data/places.geojson")
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => setData({ type: "FeatureCollection", features: [] }));
-  }, []);
-  const places = useMemo(() => (data ? data.features.map(featureToPlace) : []), [data]);
-  const placeById = useMemo(() => new Map(places.map((p) => [p.id, p])), [places]);
-
-  const filteredFeatures = useMemo(
-    () =>
-      (data?.features ?? []).filter(({ properties: p, geometry }) => {
-        if (filters.faiths.length && !filters.faiths.includes(p.faith)) return false;
-        if (filters.heritageOnly && !p.heritage) return false;
-        if (filters.maxDistanceKm !== null && location) {
-          const [lon, lat] = geometry.coordinates;
-          if (distanceKm(location, { lat, lon }) > filters.maxDistanceKm) return false;
-        }
-        return true;
-      }),
-    [data, filters, location],
+  // Filters run on the map itself (GPU expressions over the vector tiles).
+  const globeFilters: GlobeFilters = useMemo(
+    () => ({
+      faiths: filters.faiths,
+      landmarksOnly: filters.heritageOnly,
+      near: filters.maxDistanceKm !== null && location ? { lat: location.lat, lon: location.lon, km: filters.maxDistanceKm } : null,
+    }),
+    [filters, location],
   );
 
   // ---- Prayer activity (arcs, glow, open requests) --------------------------------
@@ -107,40 +95,33 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (!globeApi || !location || centeredOnUser.current) return;
     centeredOnUser.current = true;
-    if (pathname === "/") globeApi.flyTo(location.lat, location.lon, 1.9, 2200);
+    if (pathname === "/") globeApi.flyTo(location.lat, location.lon, 2.6, 2200);
   }, [globeApi, location, pathname]);
 
   const onLocate = useCallback(() => {
-    if (location && globeApi) globeApi.flyTo(location.lat, location.lon, 0.35, 1800);
+    if (location && globeApi) globeApi.flyTo(location.lat, location.lon, 13, 2400);
     else requestLocation();
   }, [location, globeApi, requestLocation]);
 
   // ---- Search ---------------------------------------------------------------------
   const onSearchPick = useCallback(
-    (result: SearchResult) => {
+    (hit: SearchHit, faith: FaithKey | null) => {
       setShowFilters(false);
-      if (result.kind === "place") {
-        router.push(`/place/${result.place.id}`);
+      if (faith) setFilters((f) => ({ ...f, faiths: [faith] }));
+      if (hit.kind === "place") {
+        router.push(`/place/${encodeURIComponent(hit.id)}`);
         return;
       }
-      if (!globeApi) return;
-      const target = resultTarget(result);
-      if ("bounds" in target && target.bounds) {
-        const [[w, s], [e, n]] = target.bounds;
-        const span = Math.max(e - w, n - s);
-        globeApi.flyTo((s + n) / 2, (w + e) / 2, Math.min(2.4, Math.max(0.12, span / 28)), 2000);
-      } else if ("center" in target) {
-        globeApi.flyTo(target.center.lat, target.center.lon, result.kind === "city" ? 0.1 : 0.6, 2000);
-      }
+      globeApi?.flyTo(hit.lat, hit.lon, hit.kind === "city" ? 12 : 4.6, 2600);
     },
     [globeApi, router],
   );
 
+  const onPlaceClick = useCallback((p: PlaceSummary) => router.push(`/place/${encodeURIComponent(p.id)}`), [router]);
+
   const ctx: GlobeContextValue = useMemo(
     () => ({
       api: globeApi,
-      places,
-      placeById,
       location,
       locationStatus,
       requestLocation,
@@ -154,39 +135,28 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
       setPick,
       setShowRequests,
     }),
-    [globeApi, places, placeById, location, locationStatus, requestLocation, activity, stats, addActivity, refreshActivity],
+    [globeApi, location, locationStatus, requestLocation, activity, stats, addActivity, refreshActivity],
   );
-
-  // Deep link straight to a place: start the camera above it.
-  const [initialPlaceId] = useState(selectedId);
-  const initialView = useMemo(() => {
-    const id = initialPlaceId;
-    const p = id ? data?.features.find((f) => f.properties.id === id) : null;
-    return p ? { lat: p.geometry.coordinates[1], lon: p.geometry.coordinates[0], altitude: 2.4 } : undefined;
-  }, [data, initialPlaceId]);
 
   const filterCount = activeFilterCount(filters);
 
   return (
     <GlobeContext.Provider value={ctx}>
-      <div className={`shell${immersive ? " is-immersive" : ""}${/^\/(world|area)/.test(pathname) ? " has-panel" : ""}`}>
+      <div className={`shell${immersive ? " is-immersive" : ""}${/^\/(world|area|suggest)/.test(pathname) ? " has-panel" : ""}`}>
         <div className="space" aria-hidden="true" />
-        {data && (
-          <GlobeCanvas
-            places={filteredFeatures}
-            theme={theme}
-            userLocation={location}
-            selectedId={selectedId}
-            activity={activity}
-            requests={showRequests ? requests : null}
-            pick={pick}
-            initialView={initialView}
-            onReady={setGlobeApi}
-            onPlaceClick={(id) => router.push(`/place/${id}`)}
-            onRequestClick={(id) => router.push(`/world/requests/${id}`)}
-            onGlobeClick={(lat, lon) => clickHandler.current?.(lat, lon)}
-          />
-        )}
+        <GlobeMap
+          theme={theme}
+          userLocation={location}
+          selected={null}
+          activity={activity}
+          requests={showRequests ? requests : null}
+          pick={pick}
+          filters={globeFilters}
+          onReady={setGlobeApi}
+          onPlaceClick={onPlaceClick}
+          onRequestClick={(id) => router.push(`/world/requests/${id}`)}
+          onGlobeClick={(lat, lon) => clickHandler.current?.(lat, lon)}
+        />
 
         {!immersive && (
           <header className="topbar-d">
@@ -198,7 +168,7 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
             </Link>
 
             <div className="topbar-d__search">
-              <SearchBar places={places} onPick={onSearchPick} />
+              <SearchBar nearby={() => globeApi?.loadedPlaces() ?? []} near={location} onPick={onSearchPick} />
               <button
                 type="button"
                 className={`pill${filterCount ? " is-on" : ""}`}
@@ -238,7 +208,6 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
               filters={filters}
               onChange={setFilters}
               hasLocation={!!location}
-              resultCount={filteredFeatures.length}
               onClose={() => setShowFilters(false)}
             />
           </div>
@@ -253,7 +222,7 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
                 <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
             </button>
-            <button type="button" className="icon-pill" onClick={() => globeApi?.flyTo(globeApi.pov().lat, globeApi.pov().lng, 2.6, 1600)} title="Zoom out to the whole world" aria-label="Zoom out to the whole world">
+            <button type="button" className="icon-pill" onClick={() => globeApi?.flyTo(globeApi.pov().lat, globeApi.pov().lng, 1.4, 2000)} title="Zoom out to the whole world" aria-label="Zoom out to the whole world">
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                 <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7" />
                 <path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -275,9 +244,7 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
 
         {children}
 
-        <p className="globe-credit">
-          Imagery: NASA · Places: Wikidata, OpenStreetMap · Cities: GeoNames
-        </p>
+        <p className="globe-credit">{CREDITS[mapProvider()]} · Places: OpenStreetMap, Overture Maps, Wikidata · Cities: GeoNames</p>
       </div>
     </GlobeContext.Provider>
   );
