@@ -1,0 +1,91 @@
+# Rebuilds the world's places of worship once a month:
+# Overture Maps + OpenStreetMap + approved user suggestions -> de-duplicated,
+# normalised -> vector tiles (PMTiles) -> published -> loaded into Postgres.
+#
+# Secrets (all optional):
+#   DATABASE_URL                      export approved suggestions, load the places table
+#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID,  upload places.pmtiles to Cloudflare R2
+#   R2_SECRET_ACCESS_KEY, R2_BUCKET
+# Without R2, the tiles are attached to a GitHub release instead.
+name: Places pipeline
+
+on:
+  schedule:
+    - cron: "17 3 2 * *" # 03:17 UTC on the 2nd of each month
+  workflow_dispatch:
+    inputs:
+      osm:
+        description: "Also download OpenStreetMap via Overpass (slow, ~2-5 h)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: pip install pyarrow fsspec aiohttp shapely
+
+      - name: Overture Maps places (~10 min)
+        run: python pipeline/overture_places.py --release latest --out pipeline/in/overture
+
+      - name: OpenStreetMap places of worship + building outlines (Overpass)
+        if: ${{ github.event_name == 'schedule' || inputs.osm }}
+        continue-on-error: true
+        timeout-minutes: 300
+        run: node pipeline/osm_overpass.mjs --out pipeline/in/osm
+
+      - name: Building outlines for landmarks (Overture Buildings)
+        run: |
+          node -e '
+            const d = require("./public/data/places.geojson");
+            for (const f of d.features) console.log(JSON.stringify({ id: "c:" + f.properties.id, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
+          ' > pipeline/in/targets.ndjson
+          python pipeline/overture_footprints.py pipeline/in/targets.ndjson pipeline/in/footprints.ndjson
+
+      - name: Approved user suggestions
+        run: node pipeline/export_suggestions.mjs pipeline/in/suggestions.ndjson
+
+      - name: Merge, de-duplicate, build tiles
+        run: node --max-old-space-size=12000 pipeline/build.mjs --in pipeline/in --out pipeline/out/world
+
+      - name: Publish tiles to Cloudflare R2
+        if: ${{ env.R2_BUCKET != '' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: aws s3 cp pipeline/out/world/places.pmtiles "s3://$R2_BUCKET/places.pmtiles" --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+
+      - name: Publish tiles to a GitHub release
+        if: ${{ env.R2_BUCKET == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="places-$(date -u +%Y-%m)"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Places of worship $(date -u +%B\ %Y)" --notes-file pipeline/out/world/stats.json
+          gh release upload "$tag" pipeline/out/world/places.pmtiles pipeline/out/world/stats.json --clobber
+
+      - name: Load the places table (search, near me)
+        if: ${{ env.DATABASE_URL != '' }}
+        run: node scripts/db-load-places.mjs pipeline/out/world/places.ndjson.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: places-stats
+          path: pipeline/out/world/stats.json

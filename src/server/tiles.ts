@@ -3,6 +3,7 @@
  *
  * - PLACES_PMTILES_URL set: the full-world file in object storage (Cloudflare
  *   R2, S3, …), read with HTTP range requests, so nothing big is deployed.
+ * - PLACES_PMTILES_URL=/abs/path.pmtiles: a local file (development).
  * - otherwise: the sample file bundled in data/tiles/places.pmtiles.
  *
  * The same file is the lookup for place pages: a place id carries its
@@ -38,7 +39,9 @@ let archive: PMTiles | null = null;
 function getArchive() {
   if (!archive) {
     const url = process.env.PLACES_PMTILES_URL;
-    archive = new PMTiles(url ? new FetchSource(url) : new FileSource(join(/* turbopackIgnore: true */ process.cwd(), "data/tiles/places.pmtiles")));
+    const local = !url || url.startsWith("/") || url.startsWith("file:");
+    const path = !url ? join(/* turbopackIgnore: true */ process.cwd(), "data/tiles/places.pmtiles") : url.replace(/^file:\/\//, "");
+    archive = new PMTiles(local ? new FileSource(path) : new FetchSource(url));
   }
   return archive;
 }

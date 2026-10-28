@@ -17,7 +17,7 @@ if (PG_URL) {
     "postgres",
     async () => {
       const sql = postgres(PG_URL, { onnotice: () => {} });
-      await sql.unsafe("drop table if exists reviews, favorites, candles, prayer_reports, prayed_for, prayers, sessions, users cascade");
+      await sql.unsafe("drop table if exists place_suggestions, reviews, favorites, candles, prayer_reports, prayed_for, prayers, sessions, users cascade");
       await sql.unsafe(readFileSync("db/schema.sql", "utf8"));
       await sql.end();
       return new PostgresStore(PG_URL);
@@ -56,6 +56,22 @@ describe.each(backends)("%s store", (_name, make) => {
     expect(stats.candles).toBe(2);
     expect(stats.candlesToday).toBe(2);
     expect(await store.lastCandleAt("kinkaku-ji", "d:x")).toBeInstanceOf(Date);
+  });
+
+  it("records which gesture was offered", async () => {
+    await store.lightCandle("blue-mosque", "d:z", "dua");
+    expect((await store.getPlaceStats("blue-mosque")).candles).toBe(1);
+  });
+
+  it("queues place suggestions for moderators", async () => {
+    const s = await store.createSuggestion({
+      kind: "new", placeId: null, name: "St Brigid's Chapel", faith: "christianity", tradition: null, address: "Main St",
+      lat: 53.3, lon: -6.2, website: null, note: "Small village chapel", ownerUser: null, ownerDevice: "device-a",
+    });
+    expect(s.status).toBe("pending");
+    expect((await store.listPendingSuggestions()).map((x) => x.id)).toContain(s.id);
+    await store.setSuggestionStatus(s.id, "approved", "Checked");
+    expect((await store.listPendingSuggestions()).map((x) => x.id)).not.toContain(s.id);
   });
 
   it("shows only published prayers on the wall, newest first, with paging", async () => {

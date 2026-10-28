@@ -1,7 +1,7 @@
 # Global Sanctuary
 
-A living globe of the world's places of worship. Spin it, tap a light, and *arrive*: look around,
-learn the history, light a candle and pray there. Send prayers and blessings to people anywhere,
+A living globe of the world's places of worship. Zoom from space to any street, find any of 1.5 million
+places of every faith, and *arrive*: look around, learn the history, and pray there in the way of its tradition. Send prayers and blessings to people anywhere,
 of any faith, and watch them travel across the globe as arcs of light.
 
 **Website** (Next.js, desktop layout) · **iOS & Android app** (Expo, shares the website) · **Postgres** backend.
@@ -10,54 +10,66 @@ of any faith, and watch them travel across the globe as arcs of light.
 
 ## What's built
 
-| Phase | Status | What you get |
+| Area | Status | What you get |
 |---|---|---|
-| 1 · Globe home | ✅ | 3D globe (spin, zoom, tilt, momentum), opens on your location, "return to my location", clustered markers, search with fly-to, filters (faith, UNESCO landmarks, distance) |
-| 2 · Light / dark | ✅ | Toggle + follows the device setting. Day: NASA Blue Marble. Night: NASA city lights, atmosphere glow, starfield, candle-like glowing markers. Smooth cross-fade |
-| 3 · Arriving at a place | ✅ | Cinematic fly-in from space, then the best available view: Street View → 360° panorama (Commons / Mapillary) → photo slideshow (Ken Burns) → 3D map. Live local time & weather, optional ambient sound, info panels (About & history, Photos, Visit & travel costs, Reviews), "Back to globe" |
-| 4 · Prayer at places | ✅ | Prayer tab inside the view: light a candle, private or shared prayers, prayer wall, "I prayed for this", anonymous posting, moderation + report |
-| 5 · Pray for people in places | ✅ | Send a prayer/blessing to any city or country (blessings from many traditions, or your own words), prayer requests, animated arcs + glow on the globe, "Prayers for your area", notifications (in-app, email, web push, phone push), block & report, optional faith, city-level privacy |
-| 6 · Accounts, reviews, travel, weather | ✅ | Optional accounts, saved places, prayer history (sent & received), reviews, travel estimates, weather & local time |
-| 7 · Phone app | ✅ (shell) | Expo app for iOS/Android around the website, with native push notifications, location and back-button handling |
-| 8 · Worldwide scale & polish | ⏳ | See [What's next](#whats-next) |
+| Globe: space to street | ✅ | One continuous map from orbit to a single building: satellite imagery that sharpens as you zoom, 3D buildings and terrain (Mapbox), tilt and rotate, zoom buttons, compass and scale bar, crisp vector labels that never overlap |
+| Every place of worship | ✅ | **1.5 million places** worldwide (Overture Maps; OpenStreetMap joins on the next pipeline run) as vector tiles: clustered from space, a distinct icon per faith at street level, names when zoomed in, famous landmarks visible from orbit |
+| Precise location | ✅ | Pins on the building's centre; glowing gold outline and 3D massing of the building you visit; pulsing beacon during the fly-in; full address, coordinates (copy), Google and Apple Maps directions |
+| Search & filters | ✅ | Places, cities, countries and faiths ("mosques in Istanbul"); filters by faith, landmarks and distance, applied instantly on the map |
+| Light / dark | ✅ | Day satellite; at night NASA Black Marble city lights from space, darkened imagery near the ground, atmosphere and stars, glowing markers; smooth cross-fade |
+| Arriving at a place | ✅ | Cinematic dive from space, then the best view: Street View → 360° (Mapillary/Commons) → **Google photorealistic 3D** → photo slideshow → aerial (the live map at the glowing building). Local time, weather, optional ambient sound, history, photos, visitor etiquette, reviews, travel |
+| Prayer at places | ✅ | Faith-appropriate gestures (candle, diya, flowers, incense, butter lamp, ema, prayer note, dua, Ardas, simple prayer), live counts, private or shared prayers, prayer wall, "I prayed for this", anonymous posting, moderation |
+| Pray for people in places | ✅ | Prayers and blessings to any city or country, requests, travelling arcs, "Prayers for your area", notifications, block & report, city-level privacy |
+| Accounts & community | ✅ | Optional accounts, saved places, history, reviews; **suggest a new place, a correction, a closure or a duplicate** → moderation queue → applied in the next data run |
+| Data pipeline | ✅ | Monthly GitHub Action: Overture + OpenStreetMap + suggestions → normalise faiths/denominations → de-duplicate → tiles + database rows. See [pipeline/README.md](pipeline/README.md) |
+| Phone app | ✅ (shell) | Expo app for iOS/Android around the website (the globe runs inside it), with native push, location and back button |
+| Phone layouts | ⏳ | Desktop layout only for now |
 
 ---
 
 ## Architecture (and why)
 
-### One codebase for web and phones
+### Map engine: Mapbox GL JS (with a free MapLibre fallback)
+
+The top priority is a crisp, smooth zoom from space to the street, so the globe is a real map engine
+rather than a 3D model of the Earth.
+
+| | Space → street sharpness | 3D buildings | Night lights, glow, arcs | Millions of markers | Phones | Cost |
+|---|---|---|---|---|---|---|
+| **Mapbox GL JS v3** ✅ | Excellent: Mapbox Satellite to ~10 cm in cities, streams progressively | ✅ + terrain | ✅ fog, stars, our layers | ✅ vector tiles | Native SDKs, same style | 50k loads/month free |
+| MapLibre GL (free fallback) | Good with MapTiler; ~10 m with free imagery | Boxes only | ✅ | ✅ | Native SDKs | Free / flat-rate |
+| CesiumJS + Google 3D | Best close-up | Photoreal | Possible | Weak beyond ~100k points | Heavy | Per 3D session |
+| globe.gl (previous version) | Blurry below country level | ✗ | ✅ | Limited | Web only | Free |
+
+**Choice:** the globe uses **Mapbox GL JS** when `NEXT_PUBLIC_MAPBOX_TOKEN` is set, otherwise
+**MapLibre GL** with free imagery (or MapTiler with `NEXT_PUBLIC_MAPTILER_KEY`). Both engines draw the
+*same* style (`src/lib/map/style.ts`), so switching is a setting, not a rewrite: useful while the
+budget is undecided. **Google Photorealistic 3D Tiles** are used only inside a place's "3D" view
+(CesiumJS, loaded on demand), never mixed into the Mapbox map, as Google's terms require.
+
+Quality and performance settings:
+- Retina rendering (device pixel ratio up to 2), antialiasing, 180 ms tile fade.
+- Mapbox preloads the destination's tiles before each fly-in (`preloadOnly`), so nothing pops in on arrival.
+- Signed-distance-field text and icons with collision detection, so labels never overlap.
+- Animations touch the map only while something moves, so it idles at 0% GPU otherwise.
+- Places come as vector tiles, filtered on the GPU, so a million points cost the same as a thousand.
+
+**Trade-offs:** Retina tiles and preloading mean more tile requests, so somewhat higher cost and battery
+use. The free fallback isn't street-level sharp (10 m Sentinel-2 imagery), but every feature works.
+
+### Web and phones
 
 ```
 app-planning/
-├── src/        Next.js website + API (everything users see, all business logic)
-└── mobile/     Expo app (iOS/Android): native shell that shows the website
+├── src/        Next.js website + API (all screens and business logic)
+├── pipeline/   Data pipeline: every place of worship → vector tiles
+└── mobile/     Expo app (iOS/Android): native shell around the website
 ```
 
-**Choice: the phone app hosts the website in a native shell**, adding the things only native code can do
-(push notifications, location permission, back button, opening links in the browser).
-
-- **Why:** the heart of the product, a WebGL globe with custom shaders, arcs, glow and immersive
-  360° views, would otherwise need to be built twice. React Native has no equivalent of globe.gl/three.js
-  that reaches the same quality, so a "native" globe would look worse *and* double the work.
-  With the shell, every feature ships on web, iOS and Android at once.
-- **Trade-off:** scrolling and animations feel slightly less native than a fully native app, and
-  the desktop layout needs a phone layout (planned in the next phase). If later you want fully native
-  screens (e.g. a native prayer list), the API and shared types in `src/lib` are already split out,
-  so screens can be moved to React Native one at a time.
-
-### Globe library: globe.gl (three.js)
-
-| | Day/night textures | Glowing markers | Animated arcs | Fly-in | Phones | Verdict |
-|---|---|---|---|---|---|---|
-| **globe.gl / three.js** | ✅ custom shader | ✅ | ✅ built in | ✅ | ✅ light, WebGL | **Chosen** |
-| CesiumJS | ✅ | ✅ | ✅ | ✅ best | ⚠️ heavy (~3 MB+), slow on mid-range phones; Cesium ion token for its imagery | Overkill |
-| Mapbox / MapLibre globe | ⚠️ raster only | ✅ | ⚠️ flat lines only | ✅ | ✅ | No raised light arcs |
-
-The street-level part of "arriving" is handled by the immersive view (Street View, 360°, map), not by the
-globe, so the globe can focus on looking beautiful from space.
-
-**Scale:** markers are clustered with Supercluster for the current zoom *and* only for the visible side of
-the Earth, so only a few hundred markers exist at once, whether the dataset has 300 or 1,000,000 places.
+The phone app hosts the website in a native shell (push, location, back button). Mapbox GL JS runs well
+in the phone's web view, so the globe works on phones today. **Next step for phones:** move the globe to
+Mapbox's native SDK (`@rnmapbox/maps`) for native 60 fps. The style JSON and layers are shared, so it's
+a port of one screen, not a rewrite. Google 3D would stay in a web view on phones (it's the heaviest view).
 
 ### Backend: Postgres (Supabase recommended)
 
@@ -73,14 +85,19 @@ Plain Postgres through our own API routes, rather than Firebase:
 
 | Need | Source | Cost | Key | Notes |
 |---|---|---|---|---|
-| Places of worship | Wikidata (sample), OpenStreetMap (full, next phase) | Free | — | ODbL / CC0; credited on every map |
+| Places of worship | Overture Maps (1.5M) + OpenStreetMap + Wikidata, via `pipeline/` | Free | — | CDLA-Permissive / ODbL (share-alike: publish the merged data under ODbL) / CC0 |
+| Places tiles hosting | Cloudflare R2 (or a GitHub release) | ~$0/month (R2: no egress fees, 10M reads free) | `PLACES_PMTILES_URL` | 240 MB file; a 36k-place sample ships in the repo |
+| Places search (all 1.5M) | Supabase Postgres + PostGIS + trigram index | Free tier fits; Pro $25/month for comfort | `DATABASE_URL` | `npm run db:places`; without it, search covers landmarks, cities and places on screen |
+| Globe imagery & map | **Mapbox** (satellite, streets, 3D buildings, terrain) | 50,000 loads/month free, then ~$5 per 1,000 (volume discounts) | `NEXT_PUBLIC_MAPBOX_TOKEN` (public, URL-restricted) | Without it: free NASA + Sentinel-2 imagery and OpenFreeMap |
+| Photoreal 3D close-ups | Google Map Tiles API (Photorealistic 3D Tiles) | Billed per 3D session after a free monthly allowance (check Google's current pricing) | `NEXT_PUBLIC_GOOGLE_MAPS_3D_KEY` (browser key, Map Tiles API only, URL-restricted) | Only charged when someone opens "3D"; coverage ~2,500 cities |
+| Night lights | NASA Black Marble (GIBS) | Free | — | Public domain |
 | History, facts | Wikipedia + Wikidata | Free | — | CC BY-SA text credited with link |
 | Photos | Wikimedia Commons | Free | — | Author + license shown for every photo |
 | 360° panoramas | Commons + **Mapillary** | Free | `MAPILLARY_ACCESS_TOKEN` (free client token) | CC BY-SA, credited |
 | Street View | Google Maps **Embed API** + Street View **metadata** | Free (Google doesn't charge for these two; confirm in your Google Cloud console) | `GOOGLE_MAPS_API_KEY` (server) + `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY` (restrict to your domain) | Optional. Without keys the app uses 360°/photos/map |
 | Reviews | **Our own reviews** + links to Google Maps / Tripadvisor | Free | — | Google Places reviews can't be stored, show max 5 and can't sit on a non-Google map; Tripadvisor's API needs approval. Linking out avoids both |
 | Travel costs | Our estimate model + booking links | Free (links can earn affiliate commission) | optional `NEXT_PUBLIC_BOOKING_AFFILIATE_ID` | Amadeus self-service is being shut down; Kiwi Tequila is closed to new sign-ups; Skyscanner needs partner approval. Travelpayouts is the best live-price option later |
-| Globe imagery | NASA Blue Marble + Earth at Night | Free | — | Public domain (credit "NASA") |
+| Offline base imagery | NASA Blue Marble + Black Marble (bundled tiles) | Free | — | Public domain |
 | Cities (rounding locations) | GeoNames (15,000+ people) | Free | — | CC BY 4.0, bundled offline |
 | Weather | MET Norway Locationforecast | Free, commercial use allowed | — | Credit MET Norway; cached 30 min. (Open-Meteo's free tier is non-commercial) |
 | Local time | Offline time-zone lookup | Free | — | |
@@ -92,8 +109,12 @@ Plain Postgres through our own API routes, rather than Firebase:
 | Hosting | Vercel | Free tier | — | |
 | App stores | Apple / Google | $99/year Apple, $25 once Google | — | Builds via Expo EAS (free tier) |
 
+**What it costs as you grow** (rough): at 10,000 visitors a month everything fits in free tiers. At
+100,000 monthly map loads, Mapbox is about $250/month (or switch to MapTiler's flat plans with one
+setting). Google 3D is pay-per-use. Supabase Pro ($25) and Vercel Pro ($20) once traffic is steady.
+
 **All keys are optional.** The app runs with none: built-in development database, built-in moderation rules,
-and the 360°/photo/map views. Secret keys only ever live on the server; `NEXT_PUBLIC_` values are designed to be public.
+free imagery and the sample places. Secret keys only ever live on the server; `NEXT_PUBLIC_` values are designed to be public.
 
 ---
 
@@ -144,8 +165,11 @@ TEST_DATABASE_URL=postgres://user:pass@localhost:5432/test_db npm test
    - `PRAYER_ENCRYPTION_KEY`: output of `openssl rand -base64 32`. Keep a copy somewhere safe.
    - `ADMIN_EMAILS`: your email (then sign up with it to moderate at `/admin`)
    - `NEXT_PUBLIC_SITE_URL`: your site's address (used in emails and notifications)
-   - optional: `ANTHROPIC_API_KEY`, push/email/Street View/Mapillary keys
+   - `NEXT_PUBLIC_MAPBOX_TOKEN`: a public token from [account.mapbox.com](https://account.mapbox.com/access-tokens) with URL restrictions set to your domain
+   - `PLACES_PMTILES_URL`: the world tiles (see [pipeline/README.md](pipeline/README.md#hosting-the-tiles))
+   - optional: `NEXT_PUBLIC_GOOGLE_MAPS_3D_KEY`, `ANTHROPIC_API_KEY`, push/email/Street View/Mapillary keys
 3. Deploy.
+4. Optional, for search across every place: load the places table (`npm run db:places`, see the pipeline README), and let the monthly GitHub Action keep it fresh.
 
 ### Phone app
 
@@ -180,29 +204,34 @@ npm install
 ## Project structure
 
 ```
-src/app/(globe)/            Globe screens (one globe stays mounted): home, place, world, area
-src/app/api/                API routes (places, prayers, world prayers, requests, me, auth, admin, blocks)
-src/components/globe/       Globe (globe.gl + shaders + clustering) and its shell
-src/components/immersive/   Arrival view: panorama viewer, Ken Burns, 3D map, panels, sound, live chips
+src/app/(globe)/            Globe screens (one globe stays mounted): home, place, world, area, suggest
+src/app/api/                API routes (tiles, search, places, prayers, world, requests, suggestions, me, auth, admin)
+src/components/globe/       The globe (Mapbox / MapLibre) and its shell
+src/lib/map/                Shared map style, faith icons
+src/components/immersive/   Arrival view: Street View, 360°, Google 3D, Ken Burns, panels, sound, live chips
+src/components/Offering.tsx Faith-appropriate devotional gestures (src/lib/gestures.ts)
 src/components/world/       Pray for the world: composer, requests, area view
 src/components/me/          My sanctuary: settings, history, blocked list
 src/server/                 Server-only: database, moderation, notifications, Wikimedia, weather, Street View
 src/lib/                    Shared logic & types (cities, blessings, travel, search, time zones, ambient sound)
-db/schema.sql               Postgres schema (npm run db:migrate)
-public/textures/            NASA globe textures (see CREDITS.md)
-public/data/                Places, cities, offline map
+db/schema.sql               Postgres schema (npm run db:migrate); db/places.sql for the places table
+pipeline/                   Places pipeline (Overture, OpenStreetMap, footprints, tiles)
+data/tiles/                 Sample places tiles (36k places)
+public/tiles, public/fonts  Offline NASA imagery tiles and map label fonts
+public/data/                Landmarks, cities, country shapes
 mobile/                     Expo iOS/Android app
-tests/                      64 tests (logic, moderation, storage on both back ends, Wikimedia parsing)
+tests/                      Tests (logic, moderation, gestures, faith normalisation, tiles, storage on both back ends)
 ```
 
 ---
 
 ## What's next
 
-1. **Worldwide places dataset**: process the OpenStreetMap planet file (`amenity=place_of_worship`) into
-   map tiles/sharded files, plus server-side search for any city. The globe's clustering is already
-   built for this, so it's a data change, not a rewrite.
-2. **Phone layouts**: responsive versions of the panels for small screens (the layout uses flexible units to make this straightforward).
-3. Service times and opening hours (from OpenStreetMap), password reset by email, live flight prices,
-   and an approved external reviews source.
-4. Legal review of the Privacy page before public launch, since prayers can reveal religious belief.
+1. **Run the pipeline with OpenStreetMap** (GitHub Actions → "Places pipeline" → Run): adds roughly a
+   million more places, mostly mosques, temples and shrines outside the Americas, plus building outlines
+   for most of them.
+2. **Native globe on phones** with `@rnmapbox/maps`, then phone layouts for the panels.
+3. Service times (from OpenStreetMap `service_times`), licensed ambient recordings per tradition,
+   password reset by email, live flight prices.
+4. Community review of the gestures and etiquette notes by people from each tradition, and a legal review
+   of the Privacy page before launch, since prayers can reveal religious belief.

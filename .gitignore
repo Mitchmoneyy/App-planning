@@ -45,3 +45,7 @@ next-env.d.ts
 
 # Local development database (built-in store)
 /.data/
+
+# Data pipeline working files
+pipeline/in/
+pipeline/out/

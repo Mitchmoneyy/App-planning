@@ -11,7 +11,7 @@ targets.ndjson: one {"id", "lon", "lat"} per line.
 Output: {"id", "building", "class", "height", "geometry": GeoJSON, "centroid": [lon, lat], "match"}.
 Needs: pyarrow fsspec aiohttp shapely.
 """
-import json, re, sys, threading, time, urllib.parse, urllib.request
+import json, os, re, sys, threading, time, urllib.parse, urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -21,7 +21,7 @@ from shapely import wkb
 from shapely.geometry import Point, mapping
 
 BUCKET = "https://overturemaps-us-west-2.s3.amazonaws.com"
-RELEASE = "2026-10-21.0"
+RELEASE = os.environ.get("OVERTURE_RELEASE", "2026-10-21.0")
 RELIGIOUS = {"church", "cathedral", "chapel", "mosque", "temple", "synagogue", "shrine", "religious", "monastery", "presbytery", "kingdom_hall", "gurdwara"}
 M = 1 / 111_320  # degrees per metre (latitude)
 

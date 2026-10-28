@@ -9,7 +9,7 @@ the whole world takes a few GB of transfer rather than ~12 GB.
 
 Writes one gzipped NDJSON file per Parquet file. Needs: pyarrow fsspec aiohttp.
 """
-import argparse, gzip, json, os, re, struct, sys, threading, time, urllib.request
+import argparse, gzip, json, os, re, struct, sys, threading, time, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import fsspec
@@ -29,6 +29,11 @@ SKIP_PRIMARY = {"wedding_chapel", "religious_school", "religious_organization", 
                 "religious_and_spiritual_goods_store", "buddhist_goods_store", "jewish_restaurant"}
 
 COLUMNS = ["id", "geometry", "names", "addresses", "websites", "confidence", "operating_status", "basic_category", "taxonomy"]
+
+
+def latest_release():
+    body = urllib.request.urlopen(f"{BUCKET}/?list-type=2&prefix=release/&delimiter=/", timeout=60).read().decode()
+    return sorted(re.findall(r"<Prefix>release/([^<]+)/</Prefix>", body))[-1]
 
 
 def list_files(release):
@@ -111,14 +116,16 @@ def do_row_group(fs, url, rg):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--release", default="2026-10-21.0")
+    ap.add_argument("--release", default="latest")
     ap.add_argument("--out", default="pipeline/out/overture")
     ap.add_argument("--workers", type=int, default=24)
     ap.add_argument("--limit-files", type=int, default=0)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     fs = fsspec.filesystem("http", client_kwargs={"trust_env": True})
-    keys = list_files(a.release)
+    release = latest_release() if a.release == "latest" else a.release
+    print("Overture release", release, flush=True)
+    keys = list_files(release)
     if a.limit_files:
         keys = keys[: a.limit_files]
     print(f"{len(keys)} files", flush=True)
@@ -140,5 +147,4 @@ def main():
 
 
 if __name__ == "__main__":
-    import urllib.parse  # noqa: E402
     main()

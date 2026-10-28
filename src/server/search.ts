@@ -11,6 +11,7 @@
 import "server-only";
 import postgres from "postgres";
 import { cityIndex } from "./geo";
+import { countryName } from "@/lib/cities";
 import type { FaithKey } from "@/lib/faiths";
 import { getCuratedPlace, getCuratedPlaceIds } from "@/lib/places.server";
 import type { SearchHit } from "@/lib/apiTypes";
@@ -68,7 +69,7 @@ async function searchDb(text: string, faith: FaithKey | null, near: { lat: numbe
       faith: r.faith as FaithKey,
       lat: Number(r.lat),
       lon: Number(r.lon),
-      detail: [r.city, r.country].filter(Boolean).join(", "),
+      detail: [r.city, r.country ?? (r.cc ? countryName(r.cc as string) : null)].filter(Boolean).join(", "),
     }));
   } catch {
     return []; // places table not loaded yet

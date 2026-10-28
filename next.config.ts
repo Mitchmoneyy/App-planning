@@ -3,10 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
-  // The server reads the places dataset at runtime (detail pages, API routes);
-  // make sure it's bundled with every server function when deployed.
+  // The server reads the landmarks, the sample places tiles and the city list
+  // at runtime (place pages, API routes): bundle them with every server function.
   outputFileTracingIncludes: {
-    "/**": ["./public/data/places.geojson"],
+    "/**": ["./public/data/places.geojson", "./public/data/cities.json", "./data/tiles/places.pmtiles"],
   },
   // Photos come from Wikimedia Commons.
   images: {

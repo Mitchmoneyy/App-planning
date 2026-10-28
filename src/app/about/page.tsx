@@ -12,14 +12,13 @@ export default function AboutPage() {
         <h1>About Global Sanctuary</h1>
         <p>
           Global Sanctuary is a quiet place to explore houses of worship of every faith around the world, and to pray at any of them
-          from wherever you are. Spin the globe, visit a cathedral, mosque, temple, synagogue or gurdwara, light a candle, and leave a
-          prayer, privately or on its prayer wall, where others can pray with you.
+          from wherever you are. Zoom from space to any street, visit a cathedral, mosque, temple, synagogue or gurdwara, pray there in the way of its
+          tradition, and leave a prayer, privately or on its prayer wall, where others can pray with you.
         </p>
         <h2>Where the information comes from</h2>
         <ul>
           <li>
-            Places and coordinates: <a href="https://www.wikidata.org/">Wikidata</a> and{" "}
-            <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.
+            Landmark facts: <a href="https://www.wikidata.org/">Wikidata</a> (CC0).
           </li>
           <li>
             Background and history: <a href="https://en.wikipedia.org/">Wikipedia</a> (CC BY-SA 4.0), credited on each page.
@@ -28,10 +27,17 @@ export default function AboutPage() {
             Photos: <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>, each with its author and license.
           </li>
           <li>
-            Map: <a href="https://openfreemap.org/">OpenFreeMap</a>, built on OpenStreetMap data.
+            Places of worship: <a href="https://overturemaps.org/">Overture Maps Foundation</a> (CDLA-Permissive 2.0) and{" "}
+            <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL), with community corrections. Building
+            outlines from OpenStreetMap, Microsoft and Google via Overture.
           </li>
           <li>
-            The globe: <a href="https://visibleearth.nasa.gov/">NASA</a> Blue Marble and Earth at Night imagery.
+            Maps and imagery: <a href="https://www.mapbox.com/about/maps/">© Mapbox</a> and Maxar where enabled; otherwise Sentinel-2 cloudless
+            by <a href="https://s2maps.eu">EOX</a> (contains modified Copernicus Sentinel data) and{" "}
+            <a href="https://openfreemap.org/">OpenFreeMap</a>. Photorealistic 3D views © Google.
+          </li>
+          <li>
+            Night lights and the offline globe: <a href="https://earthdata.nasa.gov/">NASA</a> Blue Marble and Black Marble.
           </li>
           <li>
             Cities: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Weather: <a href="https://api.met.no/">MET Norway</a>.

@@ -12,6 +12,10 @@
     "data:land": "node scripts/build-land.mjs",
     "typecheck": "tsc --noEmit",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/db-migrate.mjs",
+    "db:places": "node --env-file-if-exists=.env.local scripts/db-load-places.mjs",
+    "data:tiles": "node --max-old-space-size=12000 pipeline/build.mjs",
+    "data:base-tiles": "python3 scripts/build-base-tiles.py",
+    "data:glyphs": "node scripts/build-glyphs.mjs",
     "test": "vitest run",
     "data:cities": "node scripts/build-cities.mjs"
   },

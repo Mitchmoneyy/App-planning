@@ -112,7 +112,7 @@ export function themePaint(theme: Theme): Record<string, Record<string, unknown>
     "road-labels": { "text-color": dark ? "#ffe2b8" : "#ffffff", "text-halo-color": "rgba(10,15,30,0.8)" },
     "places-icon": { "text-color": dark ? "#fff4dc" : "#ffffff", "text-halo-color": dark ? "rgba(8,10,28,0.92)" : "rgba(15,22,40,0.85)" },
     "landmarks-icon": { "text-color": dark ? "#ffe9b8" : "#ffffff", "text-halo-color": dark ? "rgba(8,10,28,0.95)" : "rgba(15,22,40,0.9)" },
-    "cluster-glow": { "circle-opacity": dark ? 0.5 : 0.18 },
+    "cluster-glow": { "circle-opacity": dark ? 0.22 : 0 },
     "fp-fill": { "fill-opacity": dark ? 0.3 : 0.22 },
     arcs: { "line-color": dark ? "#ffe7b3" : "#c46a12" },
     "arcs-glow": { "line-color": dark ? "rgba(255,206,120,0.45)" : "rgba(214,130,30,0.35)" },
@@ -195,7 +195,7 @@ function placeLayers(p: Provider): Layer[] {
     // Clusters.
     {
       id: "cluster-glow", type: "circle", source: "places", "source-layer": "places", filter: ["has", "point_count"],
-      paint: { "circle-color": faithColorExpr(), "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 3, 18, 1000, 34, 100000, 52], "circle-blur": 1 },
+      paint: { "circle-color": faithColorExpr(), "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 3, 15, 1000, 26, 100000, 38], "circle-blur": 0.8 },
     },
     {
       id: "clusters", type: "circle", source: "places", "source-layer": "places", filter: ["has", "point_count"],

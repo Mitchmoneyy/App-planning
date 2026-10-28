@@ -6,6 +6,7 @@
  *   <in>/osm/*.ndjson(.gz)                 OpenStreetMap places of worship (pipeline/osm_overpass.mjs)
  *   <in>/overture/*.ndjson.gz              Overture Maps places (pipeline/overture_places.py)
  *   <in>/footprints.ndjson                 building outlines (pipeline/overture_footprints.py)
+ *   <in>/suggestions.ndjson                approved user suggestions (pipeline/export_suggestions.mjs)
  *
  * Output (<out>):
  *   places.pmtiles   vector tiles: layers "places" (clustered below z12), "landmarks", "footprints"
@@ -174,6 +175,21 @@ for (const file of filesIn(path.join(IN, "overture"))) {
 }
 log("overture rows", seen, "kept", places.length, "merged", stats.merged);
 
+// 4. Approved community suggestions: new places, corrections, closures, duplicates.
+const suggestions = [];
+for await (const sgn of lines(path.join(IN, "suggestions.ndjson"))) suggestions.push(sgn);
+let community = 0;
+for (const sg of suggestions.filter((x) => x.kind === "new" && x.name && x.lat != null)) {
+  const before = places.length;
+  add({
+    id: null, srcId: `community:${sg.id}`, name: sg.name, faith: sg.faith ?? "other", tradition: sg.tradition ?? null, lon: sg.lon, lat: sg.lat,
+    address: sg.address ?? null, city: null, region: null, postcode: null, cc: null, website: sg.website ?? null, wikidata: null, wikipedia: null,
+    heritage: false, landmark: false, sources: ["community"], _fpKey: `s:${sg.id}`,
+  });
+  community += places.length - before;
+}
+log("community places added", community);
+
 // ---------- ids ----------
 const tileXY = (lon, lat, z) => {
   const n = 2 ** z;
@@ -189,6 +205,26 @@ for (const p of places) {
   const [x, y] = tileXY(p.lon, p.lat, MAX_Z);
   const h = parseInt(crypto.createHash("sha1").update(p.srcId).digest("hex").slice(0, 10), 16).toString(36);
   p.id = `${x.toString(36)}-${y.toString(36)}-${h}`; // the z12 tile is encoded in the id, so a place can be found from tiles alone
+}
+
+// Corrections and removals refer to published ids, so apply them once ids exist.
+{
+  const byId = new Map(places.map((p) => [p.id, p]));
+  const drop = new Set();
+  for (const sg of suggestions) {
+    const p = byId.get(sg.placeId);
+    if (!p) continue;
+    if (sg.kind === "closed" || sg.kind === "duplicate") drop.add(p.id);
+    if (sg.kind === "correction") {
+      for (const k of ["name", "faith", "tradition", "address", "website"]) if (sg[k]) p[k] = sg[k];
+    }
+  }
+  if (drop.size) {
+    const kept = places.filter((p) => !drop.has(p.id));
+    places.length = 0;
+    places.push(...kept);
+  }
+  log("suggestions applied", suggestions.length, "removed", drop.size);
 }
 
 // ---------- tiles ----------
@@ -215,7 +251,8 @@ const regular = places.filter((p) => !p.landmark);
 const landmarks = places.filter((p) => p.landmark);
 log("indexing", regular.length, "places +", landmarks.length, "landmarks");
 const index = new Supercluster({
-  radius: 56, maxZoom: MAX_Z - 1, minPoints: 3, extent: EXTENT,
+  // radius is measured against `extent`: 60 px on a 512 px tile.
+  radius: 60 * (EXTENT / 512), maxZoom: MAX_Z - 1, minPoints: 3, extent: EXTENT,
   // Clusters keep a count per faith (n_islam, n_hinduism, …) so filters stay accurate when zoomed out.
   map: (p) => ({ faith: p.faith, [`n_${p.faith}`]: 1 }),
   reduce: (a, b) => {

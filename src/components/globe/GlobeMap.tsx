@@ -138,6 +138,7 @@ export default function GlobeMap(props: GlobeProps) {
     let cancelled = false;
     let map: AnyMap | null = null;
     let raf = 0;
+    let poll = 0;
     const provider = mapProvider();
     const engine = engineFor(provider);
 
@@ -173,7 +174,7 @@ export default function GlobeMap(props: GlobeProps) {
       m.addControl(new lib.AttributionControl({ compact: true }), "bottom-right");
       // Start with the credits folded into the (i) button.
       const foldCredits = () => m.getContainer().querySelector(".maplibregl-compact-show, .mapboxgl-compact-show")?.classList.remove("maplibregl-compact-show", "mapboxgl-compact-show");
-      m.once("load", () => window.setTimeout(foldCredits, 50));
+      m.once("style.load", () => window.setTimeout(foldCredits, 300));
 
       // Faith icons at the screen's pixel density.
       const ratio = Math.min(window.devicePixelRatio || 1, 2) >= 1.5 ? 2 : 1;
@@ -184,16 +185,20 @@ export default function GlobeMap(props: GlobeProps) {
       };
       // A tile server being unreachable isn't fatal (the NASA base layer stays): log once, quietly.
       let warned = false;
-      m.on("error", (e: { error?: Error }) => {
-        if (!warned) console.warn("Some map tiles couldn't load:", e.error?.message);
-        warned = true;
+      m.on("error", (e: { error?: Error & { status?: number } }) => {
+        const network = e.error?.status !== undefined || /fetch|network|load/i.test(e.error?.message ?? "");
+        if (!network) console.error("Map error:", e.error);
+        else if (!warned) console.warn("Some map tiles couldn't load:", e.error?.message);
+        if (network) warned = true;
       });
       m.on("styleimagemissing", (e: { id: string }) => {
         if (e.id.startsWith("faith-") || e.id.startsWith("landmark-")) addIcons();
       });
 
-      m.on("load", () => {
-        if (cancelled) return;
+      // Ready as soon as the style is in. ("load" waits for every source, and
+      // never fires if one tile provider is down.)
+      const ready = () => {
+        if (cancelled || readyRef.current || !m.isStyleLoaded()) return;
         addIcons();
         readyRef.current = true;
         applyFilters(m, latest.current.filters);
@@ -202,7 +207,10 @@ export default function GlobeMap(props: GlobeProps) {
         syncSelected(m, latest.current.selected);
         latest.current.onReady(api);
         animate();
-      });
+      };
+      m.on("style.load", ready);
+      m.on("load", ready);
+      poll = window.setInterval(() => (readyRef.current ? window.clearInterval(poll) : ready()), 400);
 
       // ----- clicks -----
       const placeFrom = (f: MapGeoJSONFeature): PlaceSummary => {
@@ -343,6 +351,7 @@ export default function GlobeMap(props: GlobeProps) {
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      window.clearInterval(poll);
       ro.disconnect();
       readyRef.current = false;
       map?.remove();
