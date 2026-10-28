@@ -3,10 +3,12 @@
  * outlines, through the Overpass API, in world tiles that split themselves
  * when a query is too large. Writes pipeline/in/osm/<tile>.ndjson.
  *
- *   node pipeline/osm_overpass.mjs --out pipeline/in/osm [--endpoint https://overpass-api.de/api/interpreter]
+ *   node pipeline/osm_overpass.mjs --out pipeline/in/osm [--max-minutes 200] [--endpoint https://overpass-api.de/api/interpreter]
  *
  * Each line: { type, id, lon, lat, tags, geometry? (GeoJSON polygon for ways/relations) }
- * Re-running skips finished tiles, so it can resume. Please keep it to one run
+ * Re-running skips finished tiles, so it can resume: with --max-minutes it stops
+ * cleanly when time is up, and the next run (GitHub Actions caches the folder)
+ * carries on where it left off. Please keep it to one run
  * a month: Overpass is a free, shared service. (For a planet-file route,
  * see pipeline/README.md: osmium tags-filter + osmium export.)
  */
@@ -17,6 +19,8 @@ const argv = process.argv.slice(2);
 const opt = (k, d) => (argv.includes(`--${k}`) ? argv[argv.indexOf(`--${k}`) + 1] : d);
 const OUT = opt("out", "pipeline/in/osm");
 const ENDPOINT = opt("endpoint", "https://overpass-api.de/api/interpreter");
+const DEADLINE = Date.now() + Number(opt("max-minutes", "100000")) * 60_000;
+let outOfTime = false;
 fs.mkdirSync(OUT, { recursive: true });
 
 const RELIGIOUS_BUILDINGS = "church|cathedral|chapel|mosque|temple|synagogue|shrine|religious|monastery|gurdwara|kingdom_hall";
@@ -49,7 +53,15 @@ async function fetchTile(bbox, depth = 0) {
   const name = bbox.map((v) => v.toFixed(2)).join("_");
   const file = path.join(OUT, `${name}.ndjson`);
   if (fs.existsSync(file)) return;
+  if (Date.now() >= DEADLINE) {
+    outOfTime = true;
+    return;
+  }
   for (let attempt = 0; attempt < 4; attempt++) {
+    if (Date.now() >= DEADLINE) {
+      outOfTime = true;
+      return;
+    }
     try {
       const res = await fetch(ENDPOINT, { method: "POST", body: new URLSearchParams({ data: query(bbox) }), headers: { "User-Agent": "GlobalSanctuary/1.0 (places pipeline)" } });
       if (res.status === 429 || res.status === 504) throw new Error(`busy ${res.status}`);
@@ -67,7 +79,7 @@ async function fetchTile(bbox, depth = 0) {
       await new Promise((r) => setTimeout(r, 30_000 * (attempt + 1)));
     }
   }
-  if (depth < 6) return split(bbox, depth);
+  if (depth < 6 && !outOfTime) return split(bbox, depth);
 }
 
 async function split([s, w, n, e], depth) {
@@ -77,4 +89,5 @@ async function split([s, w, n, e], depth) {
 
 // 20° x 20° world grid; dense areas split automatically.
 for (let s = -60; s < 80; s += 20) for (let w = -180; w < 180; w += 20) await fetchTile([s, w, s + 20, w + 20]);
-console.log("done");
+const done = fs.readdirSync(OUT).filter((f) => f.endsWith(".ndjson")).length;
+console.log(outOfTime ? `Time is up after ${done} tiles; the next run will continue from here.` : `done (${done} tiles)`);

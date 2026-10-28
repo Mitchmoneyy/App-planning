@@ -95,7 +95,7 @@ that `osm_overpass.mjs` writes.
 |---|---|---|
 | Cloudflare R2 + `PLACES_PMTILES_URL` | ~$0.01/month storage; no egress fees | Recommended. Free tier covers 10M reads/month |
 | GitHub release asset | Free | What the workflow does without R2. Fine to start; slower first byte |
-| Bundled sample (`data/tiles`) | Free | 36k places; used when nothing else is set |
+| Bundled sample (`data/tiles`) | Free | 33k places; used when nothing else is set |
 
 The app reads the file with HTTP range requests through `/api/tiles/places/{z}/{x}/{y}`,
 so browsers get normal vector tiles and the CDN caches them.

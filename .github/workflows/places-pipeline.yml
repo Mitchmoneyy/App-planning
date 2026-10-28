@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       osm:
-        description: "Also download OpenStreetMap via Overpass (slow, ~2-5 h)"
+        description: "Also download OpenStreetMap via Overpass (up to ~3 h per run; resumes next run)"
         type: boolean
         default: true
 
@@ -30,12 +30,12 @@ jobs:
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: npm ci
@@ -44,18 +44,36 @@ jobs:
       - name: Overture Maps places (~10 min)
         run: python pipeline/overture_places.py --release latest --out pipeline/in/overture
 
+      # The full OpenStreetMap download can take longer than one run allows, so
+      # progress is cached: each run continues where the last one stopped, and
+      # the tiles are built from whatever has been downloaded so far.
+      - name: Restore OpenStreetMap progress
+        if: ${{ github.event_name == 'schedule' || inputs.osm }}
+        uses: actions/cache/restore@v4
+        with:
+          path: pipeline/in/osm
+          key: osm-${{ github.run_id }}
+          restore-keys: osm-
+
       - name: OpenStreetMap places of worship + building outlines (Overpass)
         if: ${{ github.event_name == 'schedule' || inputs.osm }}
         continue-on-error: true
-        timeout-minutes: 300
-        run: node pipeline/osm_overpass.mjs --out pipeline/in/osm
+        timeout-minutes: 215
+        run: node pipeline/osm_overpass.mjs --out pipeline/in/osm --max-minutes 200
+
+      - name: Save OpenStreetMap progress
+        if: ${{ always() && (github.event_name == 'schedule' || inputs.osm) }}
+        uses: actions/cache/save@v4
+        with:
+          path: pipeline/in/osm
+          key: osm-${{ github.run_id }}
 
       - name: Building outlines for landmarks (Overture Buildings)
+        continue-on-error: true
+        timeout-minutes: 30
         run: |
-          node -e '
-            const d = require("./public/data/places.geojson");
-            for (const f of d.features) console.log(JSON.stringify({ id: "c:" + f.properties.id, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
-          ' > pipeline/in/targets.ndjson
+          mkdir -p pipeline/in
+          node pipeline/landmark_targets.mjs > pipeline/in/targets.ndjson
           python pipeline/overture_footprints.py pipeline/in/targets.ndjson pipeline/in/footprints.ndjson
 
       - name: Approved user suggestions
@@ -85,7 +103,7 @@ jobs:
         if: ${{ env.DATABASE_URL != '' }}
         run: node scripts/db-load-places.mjs pipeline/out/world/places.ndjson.gz
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: places-stats
           path: pipeline/out/world/stats.json

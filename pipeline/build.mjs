@@ -85,15 +85,26 @@ const metres = (a, b) => {
 const places = [];
 const stats = { bySource: {}, merged: 0, dropped: 0 };
 
+/** Best name match across each place's names (main, English, official, alternative). */
+const bestSimilarity = (p, q) => {
+  let best = 0;
+  for (const a of p._toks) for (const b of q._toks) best = Math.max(best, similar(a, b));
+  return best;
+};
+
 function findDuplicate(p) {
   const cx = Math.floor(p.lon / CELL), cy = Math.floor(p.lat / CELL);
   for (let dx = -1; dx <= 1; dx++)
     for (let dy = -1; dy <= 1; dy++) {
       for (const q of grid.get(`${cx + dx}:${cy + dy}`) ?? []) {
         if (p.building && q.building === p.building) return q;
+        if (p.wikidata && q.wikidata === p.wikidata) return q;
         const d = metres(p, q);
         if (d > 250) continue;
-        const s = similar(p._tok, q._tok);
+        // Two places of the same faith on the same spot are almost always one place.
+        if (d <= 30 && p.faith === q.faith) return q;
+        if (p.unnamed || q.unnamed) continue; // generic names ("Church") say nothing
+        const s = bestSimilarity(p, q);
         if ((s >= 0.6 && d <= 150) || (s === 1 && norm(p.name) === norm(q.name))) return q;
       }
     }
@@ -110,11 +121,13 @@ function add(p) {
   }
   if (ONLY_FP && !fp && !p.landmark) return;
   if (SAMPLE && !p.landmark && !inSample(p)) return;
-  p._tok = tokens(p.name);
+  p._toks = [p.name, ...(p.altNames ?? [])].filter(Boolean).map(tokens);
   const dup = findDuplicate(p);
   if (dup) {
     for (const k of ["tradition", "address", "city", "region", "postcode", "cc", "website", "wikidata", "wikipedia", "footprint", "building", "height"])
       if (dup[k] == null && p[k] != null) dup[k] = p[k];
+    // A real name beats a generic one ("Church" -> "St Mary's").
+    if (dup.unnamed && !p.unnamed) [dup.name, dup.unnamed] = [p.name, false];
     dup.sources.push(...p.sources);
     stats.merged++;
     return;
@@ -139,20 +152,36 @@ for (const f of curated.features) {
 log("curated", places.length);
 
 // 2. OpenStreetMap.
+// Unnamed places (often small rural chapels and shrines) get a plain name from their faith.
+const GENERIC_NAME = {
+  christianity: "Church", islam: "Mosque", judaism: "Synagogue", hinduism: "Hindu temple", buddhism: "Buddhist temple",
+  sikhism: "Gurdwara", shinto: "Shinto shrine", jainism: "Jain temple", bahai: "Bahá'í centre", chinese: "Temple",
+  zoroastrianism: "Fire temple", other: "Place of worship",
+};
+// OSM writes Wikipedia links as "lang:Title"; the app uses English titles.
+const englishWikipedia = (v) => (v && v.startsWith("en:") ? v.slice(3) : null);
+let unnamed = 0;
 for (const file of filesIn(path.join(IN, "osm"))) {
   for await (const r of lines(file)) {
     const t = r.tags ?? {};
-    if (!t.name) continue;
+    // Buildings without amenity=place_of_worship must at least have a name to count.
+    if (!t.name && t.amenity !== "place_of_worship") continue;
     const { faith, tradition } = fromOsm(t, r.cc);
+    const english = t["name:en"];
+    const name = t.name ? (english && /[^\x00-\x7f]/.test(t.name) ? english : t.name) : GENERIC_NAME[faith] ?? GENERIC_NAME.other;
+    if (!t.name) unnamed++;
     add({
-      id: null, srcId: `osm:${r.type}/${r.id}`, name: t["name:en"] && /[^\x00-\x7f]/.test(t.name) ? t["name:en"] : t.name, faith, tradition,
+      id: null, srcId: `osm:${r.type}/${r.id}`, name, faith, tradition, unnamed: !t.name,
+      altNames: [english, t.official_name, t.alt_name, t.old_name, t["name:latin"]].filter((n) => n && n !== name),
       lon: r.lon, lat: r.lat, address: [t["addr:housenumber"], t["addr:street"]].filter(Boolean).join(" ") || null,
       city: t["addr:city"] ?? null, region: null, postcode: t["addr:postcode"] ?? null, cc: r.cc ?? null, website: t.website ?? t["contact:website"] ?? null,
-      wikidata: t.wikidata ?? null, wikipedia: t.wikipedia ?? null, heritage: !!t.heritage, landmark: !!(t.wikidata && t.wikipedia),
-      sources: ["osm"], _fpKey: `osm:${r.type}/${r.id}`, footprintInline: r.geometry ?? null,
+      wikidata: t.wikidata ?? null, wikipedia: englishWikipedia(t.wikipedia), heritage: !!t.heritage,
+      landmark: false, // only curated landmarks are shown from space
+      sources: ["osm"], _fpKey: `osm:${r.type}/${r.id}`, footprint: r.geometry ?? null,
     });
   }
 }
+log("unnamed OSM places given a generic name", unnamed);
 log("after osm", places.length);
 
 // 3. Overture.
@@ -199,8 +228,6 @@ const tileXY = (lon, lat, z) => {
   return [x, y];
 };
 for (const p of places) {
-  if (p.footprintInline && !p.footprint) p.footprint = p.footprintInline;
-  delete p.footprintInline;
   if (p.id) continue;
   const [x, y] = tileXY(p.lon, p.lat, MAX_Z);
   const h = parseInt(crypto.createHash("sha1").update(p.srcId).digest("hex").slice(0, 10), 16).toString(36);
@@ -346,8 +373,8 @@ const gz = zlib.createGzip();
 const outRows = fs.createWriteStream(path.join(OUT, "places.ndjson.gz"));
 gz.pipe(outRows);
 for (const p of places) {
-  const { _tok, _fpKey, srcId, ...row } = p;
-  void _tok; void _fpKey;
+  const { _toks, _fpKey, srcId, altNames, ...row } = p;
+  void _toks; void _fpKey; void altNames;
   gz.write(JSON.stringify({ ...row, sourceIds: srcId ? [srcId] : [] }) + "\n");
 }
 gz.end();
