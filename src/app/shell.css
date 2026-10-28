@@ -1788,3 +1788,13 @@
   font-size: 0.86rem;
   white-space: nowrap;
 }
+
+/* With a side panel open, the map shifts left but still fills the screen,
+   and its controls move out from under the panel. */
+.shell.has-panel .globe-canvas {
+  right: -12vw;
+}
+
+.shell.has-panel .globe-canvas :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) {
+  right: calc(min(460px, 40vw) + 44px);
+}
