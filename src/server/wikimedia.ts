@@ -28,6 +28,17 @@ export interface Photo {
   sourceUrl: string; // Commons file page
 }
 
+/** A 360° equirectangular photo, viewable as a look-around panorama. */
+export interface Panorama {
+  url: string; // ~4096px wide equirectangular image
+  title: string;
+  author: string | null;
+  license: string | null;
+  licenseUrl: string | null;
+  sourceUrl: string;
+  source: "Wikimedia Commons" | "Mapillary";
+}
+
 export interface HistorySection {
   heading: string;
   text: string;
@@ -42,6 +53,7 @@ export interface PlaceInfo {
   website: string | null;
   address: string | null;
   photos: Photo[];
+  panoramas: Panorama[];
   wikipediaUrl: string | null;
   wikipediaTitle: string | null;
   wikidataId: string | null;
@@ -56,6 +68,7 @@ const EMPTY: PlaceInfo = {
   website: null,
   address: null,
   photos: [],
+  panoramas: [],
   wikipediaUrl: null,
   wikipediaTitle: null,
   wikidataId: null,
@@ -252,6 +265,7 @@ interface ImageInfo {
 interface CommonsPage {
   title: string;
   imageinfo?: ImageInfo[];
+  categories?: { title: string }[];
 }
 
 /** Commons metadata fields are small HTML snippets; we want plain text. */
@@ -290,9 +304,32 @@ export function toPhoto(page: CommonsPage): Photo | null {
   };
 }
 
-const IMAGE_PROPS = { prop: "imageinfo", iiprop: "url|mime|size|extmetadata", iiurlwidth: "1024" };
+const IMAGE_PROPS = { prop: "imageinfo|categories", iiprop: "url|mime|size|extmetadata", iiurlwidth: "1024", cllimit: "max", clshow: "!hidden" };
 
-async function commonsPhotos(mainImage: string | null, category: string | null, limit = 12): Promise<Photo[]> {
+const PANO_HINT = /360|spherical|equirectangular|panoram|photosphere|photo sphere|vr view/i;
+
+/** A 2:1, large, 360-labelled image is an equirectangular panorama. */
+export function toPanorama(page: CommonsPage): Panorama | null {
+  const info = page.imageinfo?.[0];
+  if (!info?.thumburl || !/^image\/(jpeg|png|webp)$/.test(info.mime)) return null;
+  const ratio = info.width / info.height;
+  if (ratio < 1.95 || ratio > 2.05 || info.width < 3000) return null;
+  const labels = [page.title, ...(page.categories ?? []).map((c) => c.title)].join(" ");
+  if (!PANO_HINT.test(labels)) return null;
+  const meta = info.extmetadata ?? {};
+  const width = Math.min(4096, info.width);
+  return {
+    url: info.thumburl.replace(/\/(\d+)px-/, `/${width}px-`),
+    title: page.title.replace(/^File:/, "").replace(/\.[a-z]+$/i, ""),
+    author: stripHtml(meta.Artist?.value)?.slice(0, 120) ?? null,
+    license: stripHtml(meta.LicenseShortName?.value),
+    licenseUrl: meta.LicenseUrl?.value ?? null,
+    sourceUrl: info.descriptionurl,
+    source: "Wikimedia Commons",
+  };
+}
+
+async function commonsMedia(mainImage: string | null, category: string | null, limit = 12): Promise<{ photos: Photo[]; panoramas: Panorama[] }> {
   const pages: CommonsPage[] = [];
 
   if (mainImage) {
@@ -317,14 +354,19 @@ async function commonsPhotos(mainImage: string | null, category: string | null, 
 
   const seen = new Set<string>();
   const photos: Photo[] = [];
+  const panoramas: Panorama[] = [];
   for (const page of pages) {
     if (seen.has(page.title)) continue;
     seen.add(page.title);
-    const photo = toPhoto(page);
+    const pano = toPanorama(page);
+    if (pano) {
+      if (panoramas.length < 4) panoramas.push(pano);
+      continue; // panoramas look distorted as flat photos
+    }
+    const photo = photos.length < limit ? toPhoto(page) : null;
     if (photo) photos.push(photo);
-    if (photos.length >= limit) break;
   }
-  return photos;
+  return { photos, panoramas };
 }
 
 // --- Putting it together ------------------------------------------------------
@@ -342,7 +384,7 @@ export async function getPlaceInfo(place: Place): Promise<PlaceInfo> {
   const title = usableSummary?.title ?? null;
 
   const [sections, wd] = await Promise.all([title ? wikipediaSections(title) : [], qid ? wikidataFacts(qid) : null]);
-  const photos = wd ? await commonsPhotos(wd.mainImage, wd.commonsCategory) : [];
+  const media = wd ? await commonsMedia(wd.mainImage, wd.commonsCategory) : { photos: [], panoramas: [] };
 
   const info: PlaceInfo = {
     ...EMPTY,
@@ -353,7 +395,8 @@ export async function getPlaceInfo(place: Place): Promise<PlaceInfo> {
     facts: wd?.facts ?? [],
     website: place.website ?? wd?.website ?? null,
     address: wd?.address ?? null,
-    photos,
+    photos: media.photos,
+    panoramas: media.panoramas,
     wikipediaUrl: usableSummary?.content_urls?.desktop?.page ?? null,
     wikipediaTitle: title,
     wikidataId: qid,

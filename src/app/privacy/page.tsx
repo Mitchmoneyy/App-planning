@@ -35,6 +35,21 @@ export default function PrivacyPage() {
           <li>You can remove any of your prayers at any time from My sanctuary.</li>
         </ul>
 
+        <h2>Praying for people in places</h2>
+        <ul>
+          <li>
+            <strong>We never store or show anyone&apos;s exact location.</strong> When you use your location, it is rounded in your own
+            browser to the nearest city (or just the country) before anything is sent.
+          </li>
+          <li>When you send a prayer to a place, you choose whether to show where you&apos;re praying from: your city, your country, or nothing.</li>
+          <li>Prayer requests show your city or country only, and are anonymous unless you choose to show your first name.</li>
+          <li>Your faith is optional, and only shown if you turn that on.</li>
+          <li>
+            You choose which notifications you get, and how (in the app, email, or push). You can block anyone: their prayers and
+            requests disappear for you, and they can&apos;t trigger notifications to you.
+          </li>
+        </ul>
+
         <h2>With an account</h2>
         <ul>
           <li>We store your email, the name you choose, and a securely hashed password.</li>
@@ -43,7 +58,8 @@ export default function PrivacyPage() {
 
         <h2>Other sites</h2>
         <p>
-          Photos load from Wikimedia, and the map loads from OpenFreeMap. Links to booking sites, Google Maps and others take you to
+          Photos load from Wikimedia, the map from OpenFreeMap, and weather from MET Norway (our server asks for it, so your
+          location isn&apos;t sent to them). Where it&apos;s set up, Street View is embedded from Google, and Google may set its own cookies. Links to booking sites, Google Maps and others take you to
           those sites, which have their own privacy policies.
         </p>
       </main>

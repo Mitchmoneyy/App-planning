@@ -2,7 +2,7 @@
  * GET  /api/places/:id/prayers?before=<iso>  — the public prayer wall
  * POST /api/places/:id/prayers               — offer a prayer (public or private)
  */
-import { actorKey, getStore, type PrayerStatus } from "@/server/db";
+import { actorKey, getStore, senderActor, type PrayerStatus } from "@/server/db";
 import { assertSameOrigin, clientIp, getIdentity, handle, HttpError, privateJson, readJson, requirePlace } from "@/server/http";
 import { cleanText, moderate } from "@/server/moderation";
 import { rateLimit } from "@/server/rateLimit";
@@ -20,7 +20,9 @@ export const GET = handle(async (req: Request, ctx: RouteContext<"/api/places/[i
 
   const who = await getIdentity();
   const store = getStore();
-  const prayers = await store.listPublicPrayers(place.id, PAGE_SIZE, before);
+  const page = await store.listPublicPrayers(place.id, PAGE_SIZE, before);
+  const blocked = new Set(await store.blockedActors(actorKey(who)));
+  const prayers = page.filter((p) => !blocked.has(senderActor(p)));
   const prayed = await store.prayedForSet(
     prayers.map((p) => p.id),
     actorKey(who),
@@ -28,7 +30,7 @@ export const GET = handle(async (req: Request, ctx: RouteContext<"/api/places/[i
 
   return privateJson({
     prayers: prayers.map((p) => toWallPrayer(p, prayed.has(p.id), ownsPrayer(p, who))),
-    nextCursor: prayers.length === PAGE_SIZE ? prayers[prayers.length - 1].createdAt : null,
+    nextCursor: page.length === PAGE_SIZE ? page[page.length - 1].createdAt : null,
   });
 });
 

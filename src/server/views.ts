@@ -1,9 +1,11 @@
 /** Shapes records into what the browser is allowed to see. */
 import "server-only";
-import type { PrayerRecord, ReviewRecord } from "./db";
+import type { AreaRef, PrayerRecord, PrayerRequestRecord, ReviewRecord, WorldPrayerRecord } from "./db";
+import { countryName } from "@/lib/cities";
+import { faithOptionLabel } from "@/lib/blessings";
 import { openText } from "./security";
 import { getPlace } from "@/lib/places.server";
-import type { OwnPrayer, ReviewView, WallPrayer } from "@/lib/apiTypes";
+import type { ActivityItem, AreaView, OwnPrayer, RequestView, ReviewView, WallPrayer, WorldPrayerView } from "@/lib/apiTypes";
 
 /** Public wall entry: no owner ids, name only if not anonymous. */
 export const toWallPrayer = (p: PrayerRecord, prayedByMe: boolean, mine: boolean): WallPrayer => ({
@@ -51,3 +53,52 @@ export const toReviewView = (r: ReviewRecord, mine: boolean): ReviewView => ({
 /** Owner of a prayer = signed-in author, or the same device for anonymous ones. */
 export const ownsPrayer = (p: PrayerRecord, who: { deviceId: string; userId: string | null }) =>
   (who.userId !== null && p.ownerUser === who.userId) || (!p.ownerUser && p.ownerDevice === who.deviceId);
+
+export const toAreaView = (a: AreaRef): AreaView => ({
+  kind: a.kind,
+  name: a.name,
+  country: countryName(a.cc),
+  cc: a.cc,
+  cityId: a.cityId,
+  lat: a.lat,
+  lon: a.lon,
+});
+
+const areaText = (a: AreaRef) => (a.kind === "city" ? `${a.name}, ${countryName(a.cc)}` : countryName(a.cc));
+
+export const toWorldPrayerView = (p: WorldPrayerRecord, mine: boolean): WorldPrayerView => ({
+  id: p.id,
+  body: p.body,
+  name: p.anonymous ? null : p.displayName,
+  faith: p.showFaith ? faithOptionLabel(p.faith) : null,
+  target: toAreaView(p.target),
+  origin: p.origin ? toAreaView(p.origin) : null,
+  requestId: p.requestId,
+  createdAt: p.createdAt,
+  mine,
+});
+
+export const toActivity = (p: WorldPrayerRecord): ActivityItem => ({
+  id: p.id,
+  from: p.origin ? { lat: p.origin.lat, lon: p.origin.lon, label: areaText(p.origin) } : null,
+  to: { lat: p.target.lat, lon: p.target.lon, label: areaText(p.target) },
+  createdAt: p.createdAt,
+});
+
+export const toRequestView = (r: PrayerRequestRecord, opts: { prayedByMe: boolean; mine: boolean }): RequestView => ({
+  id: r.id,
+  body: r.body,
+  name: r.anonymous ? null : r.displayName,
+  faith: r.showFaith ? faithOptionLabel(r.faith) : null,
+  area: toAreaView(r.area),
+  prayedCount: r.prayedCount,
+  prayedByMe: opts.prayedByMe,
+  mine: opts.mine,
+  closed: r.closed,
+  visibility: r.visibility,
+  status: r.status,
+  createdAt: r.createdAt,
+});
+
+export const ownsWorldPrayer = (p: WorldPrayerRecord, who: { deviceId: string; userId: string | null }) =>
+  (who.userId !== null && p.senderUser === who.userId) || (!p.senderUser && p.senderDevice === who.deviceId);

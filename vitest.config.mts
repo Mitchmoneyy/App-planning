@@ -9,5 +9,6 @@ export default defineConfig({
       "server-only": fileURLToPath(new URL("./tests/server-only-stub.ts", import.meta.url)),
     },
   },
-  test: { environment: "node", include: ["tests/**/*.test.ts"] },
+  // Files run one at a time: the storage tests share one test database.
+  test: { environment: "node", include: ["tests/**/*.test.ts"], fileParallelism: false },
 });

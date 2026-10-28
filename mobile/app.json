@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Global Sanctuary",
+    "slug": "global-sanctuary",
+    "scheme": "globalsanctuary",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#05070f",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#05070f"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.globalsanctuary",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Global Sanctuary uses your location to centre the globe on where you are. It's rounded to your city and never shared exactly."
+      }
+    },
+    "android": {
+      "package": "app.globalsanctuary",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1020",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [["expo-notifications", { "color": "#d9b26f" }]],
+    "extra": {
+      "siteUrl": "https://your-global-sanctuary.vercel.app"
+    }
+  }
+}

@@ -27,7 +27,7 @@ export interface ModerationResult {
   selfHarm: boolean;
 }
 
-export type ContentKind = "prayer" | "review";
+export type ContentKind = "prayer" | "review" | "world-prayer" | "prayer-request";
 
 // --- Built-in rules ---------------------------------------------------------
 
@@ -36,6 +36,13 @@ const EMAIL = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
 /** A run of digits and phone punctuation containing 9+ digits (years like "1990-2020" have only 8). */
 const PHONE_RUN = /\+?[\d(][\d\s().-]{7,}\d/g;
 const hasPhone = (text: string) => (text.match(PHONE_RUN) ?? []).some((run) => run.replace(/\D/g, "").length >= 9);
+/**
+ * Content aimed at other faiths: attacks, mockery, or attempts to convert.
+ * Held for a person to review (the AI check catches subtler cases).
+ */
+const FAITH_HOSTILITY =
+  /\b(?:false (?:god|gods|religion|prophet)s?|infidels?|kafirs?|heathens?|idol[- ]worshipp?ers?|devil[- ]worship\w*|(?:will|going to) burn in hell|repent (?:or|and) (?:accept|convert|believe)|(?:must|should|need to) convert|convert (?:to|or)|only (?:true|real) (?:religion|god|faith)|your (?:religion|faith|god) is (?:false|fake|a lie|evil))\b/i;
+
 const PROFANITY = /\b(?:fuck\w*|shit\w*|cunt\w*|bitch\w*|bastard\w*|asshole\w*|motherf\w*|dickhead\w*|piss off|wank\w*)\b/i;
 const SELF_HARM =
   /\b(?:kill(?:ing)? myself|end(?:ing)? my (?:own )?life|take my (?:own )?life|suicid\w*|want(?:ed)? to die|don'?t want to (?:live|be alive)|self[- ]?harm\w*|hurt(?:ing)? myself|cut(?:ting)? myself|no reason to live)\b/i;
@@ -63,6 +70,14 @@ export function localCheck(text: string): ModerationResult {
       note: "possible self-harm risk",
     };
   }
+  if (FAITH_HOSTILITY.test(text)) {
+    return {
+      ...ok,
+      decision: "review",
+      message: "Thank you. Messages here stay supportive of every faith, so a person will read this before it appears.",
+      note: "possible attack on or proselytising toward another faith",
+    };
+  }
   if (PROFANITY.test(text)) {
     return { ...ok, decision: "review", message: "Your words will appear after a quick review.", note: "profanity" };
   }
@@ -88,8 +103,11 @@ Approve:
 - First names or relationships of people being prayed for ("my mother", "Ana"), and illnesses or hardships.
 - Reviews that describe a visit honestly, including criticism of the building, services, crowds or staff.
 
+This space is shared by people of all faiths and none. Prayers and blessings from any tradition are welcome, including ones that name God, Allah, the Buddha, Waheguru or others.
+
 Reject:
 - Hate or contempt toward any religion, ethnicity, nationality, gender, sexuality or disability.
+- Mocking or attacking another faith, calling it false, or trying to convert people ("you must accept…", "turn from your false religion"). A person sharing their own faith in a blessing is fine; telling others theirs is wrong is not.
 - Harassment, insults or threats toward people, including mocking other people's prayers.
 - Sexual content, graphic violence, or encouragement of violence or crime.
 - Advertising, spam, scams, solicitation, or political campaigning.

@@ -30,7 +30,20 @@ export default function AboutPage() {
           <li>
             Map: <a href="https://openfreemap.org/">OpenFreeMap</a>, built on OpenStreetMap data.
           </li>
+          <li>
+            The globe: <a href="https://visibleearth.nasa.gov/">NASA</a> Blue Marble and Earth at Night imagery.
+          </li>
+          <li>
+            Cities: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Weather: <a href="https://api.met.no/">MET Norway</a>.
+          </li>
+          <li>360° views: Wikimedia Commons and Mapillary contributors; Google Street View where available.</li>
         </ul>
+        <h2>Open to every faith</h2>
+        <p>
+          Anyone can send a prayer or blessing to people anywhere in the world, in their own words or using a blessing from one of many
+          traditions, and people can ask the world to pray for them. Messages here stay supportive: anything that mocks or attacks
+          another faith, or tries to convert people, is held back.
+        </p>
         <h2>Travel estimates</h2>
         <p>
           Travel and lodging costs are rough estimates from typical prices, not quotes. Booking links may earn Global Sanctuary a small

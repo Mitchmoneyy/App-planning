@@ -4,6 +4,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import BlockedList from "./me/BlockedList";
+import WorldHistory from "./me/WorldHistory";
+import WorldSettings from "./me/WorldSettings";
 import { useMe } from "./MeProvider";
 import { usePlaces } from "@/hooks/usePlaces";
 import type { OwnPrayer } from "@/lib/apiTypes";
@@ -107,7 +110,7 @@ export default function MySanctuary() {
                     {faithLabel(p.faith)} · {[p.city, p.country].filter(Boolean).join(", ")}
                   </small>
                 </span>
-                <Link href={`/place/${p.id}/pray`} className="small-link">
+                <Link href={`/place/${p.id}?tab=pray`} className="small-link">
                   Pray
                 </Link>
                 <button type="button" className="link-button" onClick={() => setFavorite(p.id, false)} aria-label={`Remove ${p.name}`}>
@@ -119,15 +122,27 @@ export default function MySanctuary() {
         )}
       </section>
 
+      <section className="card" aria-labelledby="world-heading">
+        <h2 id="world-heading">Prayers with the world</h2>
+        <WorldHistory signedIn={Boolean(me?.user)} />
+      </section>
+
+      {me?.user && (
+        <section className="card" id="notifications" aria-labelledby="notify-heading">
+          <h2 id="notify-heading">Your area &amp; notifications</h2>
+          <WorldSettings />
+        </section>
+      )}
+
       <section className="card" aria-labelledby="history-heading">
-        <h2 id="history-heading">My prayers</h2>
+        <h2 id="history-heading">Prayers at places of worship</h2>
         {prayers === null && <p className="muted">Loading…</p>}
         {prayers?.length === 0 && <p className="muted">Prayers you offer, private or shared, will appear here. Only you can see this list.</p>}
         <ul className="own-prayers">
           {prayers?.map((p) => (
             <li key={p.id}>
               <p className="own-prayers__head">
-                <Link href={`/place/${p.placeId}/pray`}>{p.placeName}</Link>
+                <Link href={`/place/${p.placeId}?tab=pray`}>{p.placeName}</Link>
                 <span className={`status status--${p.status}`}>{p.statusLabel}</span>
               </p>
               <p className="prose">{p.body}</p>
@@ -142,6 +157,11 @@ export default function MySanctuary() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="card" aria-labelledby="blocked-heading">
+        <h2 id="blocked-heading">Blocked</h2>
+        <BlockedList />
       </section>
 
       {me?.user && (

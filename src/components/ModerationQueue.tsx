@@ -8,7 +8,7 @@ import { api, ApiError, timeAgo } from "@/lib/client";
 
 interface QueueItem {
   id: string;
-  placeId: string;
+  placeId: string | null;
   placeName: string;
   body: string;
   status: string;
@@ -21,7 +21,7 @@ interface QueueItem {
 
 export default function ModerationQueue() {
   const { me, loading } = useMe();
-  const [queue, setQueue] = useState<{ prayers: QueueItem[]; reviews: QueueItem[] } | null>(null);
+  const [queue, setQueue] = useState<{ prayers: QueueItem[]; reviews: QueueItem[]; worldPrayers: QueueItem[]; requests: QueueItem[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -36,7 +36,8 @@ export default function ModerationQueue() {
     if (me?.user?.isAdmin) load();
   }, [me, load]);
 
-  async function act(kind: "prayer" | "review", id: string, action: "approve" | "remove") {
+  type Kind = "prayer" | "review" | "world_prayer" | "request";
+  async function act(kind: Kind, id: string, action: "approve" | "remove") {
     await api("/api/admin/moderate", { body: { kind, id, action } });
     load();
   }
@@ -52,7 +53,7 @@ export default function ModerationQueue() {
   if (error) return <p className="form-message is-error">{error}</p>;
   if (!queue) return <p className="muted">Loading…</p>;
 
-  const section = (kind: "prayer" | "review", items: QueueItem[], title: string) => (
+  const section = (kind: Kind, items: QueueItem[], title: string) => (
     <section className="card">
       <h2>
         {title} ({items.length})
@@ -62,7 +63,7 @@ export default function ModerationQueue() {
         {items.map((item) => (
           <li key={item.id}>
             <p className="queue__meta">
-              <Link href={`/place/${item.placeId}`}>{item.placeName}</Link> · <span className={`status status--${item.status}`}>{item.status}</span>
+              {item.placeId ? <Link href={`/place/${item.placeId}`}>{item.placeName}</Link> : <strong>{item.placeName}</strong>} · <span className={`status status--${item.status}`}>{item.status}</span>
               {item.reports ? ` · ${item.reports} reports` : ""}
               {item.rating ? ` · ${item.rating}★ by ${item.name}` : ""} · {timeAgo(item.createdAt)}
             </p>
@@ -86,7 +87,9 @@ export default function ModerationQueue() {
     <div className="stack-lg">
       <h1>Moderation queue</h1>
       <p className="muted">Held by the automatic check, or hidden after reports. Possible self-harm notes deserve a gentle eye.</p>
-      {section("prayer", queue.prayers, "Prayers")}
+      {section("world_prayer", queue.worldPrayers, "Prayers for places")}
+      {section("request", queue.requests, "Prayer requests")}
+      {section("prayer", queue.prayers, "Prayers at places of worship")}
       {section("review", queue.reviews, "Reviews")}
     </div>
   );

@@ -47,6 +47,35 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Inside the phone app: the native shell hands us its push token
+  // (window.__gsSetExpoToken). Register it once someone is signed in.
+  const [expoToken, setExpoToken] = useState<string | null>(null);
+  useEffect(() => {
+    const w = window as unknown as { __gsSetExpoToken?: (t: string) => void };
+    w.__gsSetExpoToken = (t: string) => {
+      try {
+        sessionStorage.setItem("gs-expo-token", t);
+      } catch {
+        // ignore
+      }
+      setExpoToken(t);
+    };
+    try {
+      const saved = sessionStorage.getItem("gs-expo-token");
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restore after a page load inside the app
+      if (saved) setExpoToken(saved);
+    } catch {
+      // ignore
+    }
+    return () => {
+      delete w.__gsSetExpoToken;
+    };
+  }, []);
+  const userId = me?.user?.id;
+  useEffect(() => {
+    if (userId && expoToken) api("/api/me/push", { body: { kind: "expo", token: expoToken } }).catch(() => {});
+  }, [userId, expoToken]);
+
   const value = useMemo<MeContext>(
     () => ({ me, loading, refresh, setFavorite, isFavorite: (id) => me?.favorites.includes(id) ?? false }),
     [me, loading, refresh, setFavorite],

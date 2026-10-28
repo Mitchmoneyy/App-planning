@@ -1,47 +1,18 @@
 "use client";
 
 /**
- * A place's prayer space: light a candle, offer a prayer (private or on the
- * wall), and pray for others. Designed to feel quiet: dark, warm, unhurried.
+ * The pieces of a place's prayer space (used inside the immersive view):
+ * light a candle, offer a prayer (private or on the wall), pray for others.
  */
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useMe } from "./MeProvider";
-import { usePlaceStats } from "@/hooks/usePlaceStats";
+import SafetyMenu from "./SafetyMenu";
 import type { PlaceStatsView, SubmitResult, WallPrayer } from "@/lib/apiTypes";
 import { api, ApiError, timeAgo } from "@/lib/client";
-import type { Place } from "@/lib/types";
-
-export default function PrayerSpace({ place }: { place: Place }) {
-  const { stats, setStats } = usePlaceStats(place.id);
-  const [wallKey, setWallKey] = useState(0); // bump to reload the wall after posting
-
-  return (
-    <div className="sanctuary">
-      <header className="sanctuary__header">
-        <Link href={`/place/${place.id}`} className="sanctuary__back">
-          ← {place.name}
-        </Link>
-        <h1>Pray at {place.name}</h1>
-        <p className="sanctuary__where">{[place.city, place.country].filter(Boolean).join(", ")}</p>
-      </header>
-
-      <Candle placeId={place.id} stats={stats} onStats={setStats} />
-
-      <PrayerForm placeId={place.id} onPosted={() => setWallKey((k) => k + 1)} />
-
-      <PrayerWall key={wallKey} placeId={place.id} />
-
-      <p className="sanctuary__footer">
-        You can see every prayer you&apos;ve offered in <Link href="/me">My sanctuary</Link>.
-      </p>
-    </div>
-  );
-}
 
 // --- Candle -----------------------------------------------------------------
 
-function Candle({ placeId, stats, onStats }: { placeId: string; stats: PlaceStatsView | null; onStats(s: PlaceStatsView): void }) {
+export function Candle({ placeId, stats, onStats }: { placeId: string; stats: PlaceStatsView | null; onStats(s: PlaceStatsView): void }) {
   const [lit, setLit] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -109,7 +80,7 @@ function Candle({ placeId, stats, onStats }: { placeId: string; stats: PlaceStat
 
 // --- Prayer form --------------------------------------------------------------
 
-function PrayerForm({ placeId, onPosted }: { placeId: string; onPosted(): void }) {
+export function PrayerForm({ placeId, onPosted }: { placeId: string; onPosted(): void }) {
   const { me } = useMe();
   const [text, setText] = useState("");
   const [isPublic, setIsPublic] = useState(false);
@@ -205,7 +176,7 @@ function PrayerForm({ placeId, onPosted }: { placeId: string; onPosted(): void }
 }
 
 /** Shown when a prayer suggests the author may be in danger. */
-function SupportNote() {
+export function SupportNote() {
   return (
     <aside className="support-note">
       <p>
@@ -224,7 +195,7 @@ function SupportNote() {
 
 // --- Prayer wall ----------------------------------------------------------------
 
-function PrayerWall({ placeId }: { placeId: string }) {
+export function PrayerWall({ placeId }: { placeId: string }) {
   const [prayers, setPrayers] = useState<WallPrayer[] | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -274,7 +245,7 @@ function PrayerWall({ placeId }: { placeId: string }) {
                 <span aria-hidden="true">🙏</span> {p.prayedByMe ? "You prayed for this" : p.mine ? "Your prayer" : "I prayed for this"}
                 {p.prayedCount > 0 && <span className="pray-for__count">{p.prayedCount}</span>}
               </button>
-              {!p.mine && <ReportButton prayerId={p.id} onReported={() => setPrayers((l) => l?.filter((x) => x.id !== p.id) ?? null)} />}
+              {!p.mine && <SafetyMenu target={{ kind: "church_prayer", id: p.id }} onHidden={() => setPrayers((l) => l?.filter((x) => x.id !== p.id) ?? null)} />}
             </div>
           </li>
         ))}
@@ -294,46 +265,5 @@ function PrayerWall({ placeId }: { placeId: string }) {
         </button>
       )}
     </section>
-  );
-}
-
-const REPORT_REASONS = [
-  ["hateful", "Hateful or disrespectful"],
-  ["harassment", "Harassment or threats"],
-  ["personal-info", "Shares someone's private information"],
-  ["spam", "Spam or advertising"],
-  ["inappropriate", "Sexual or otherwise inappropriate"],
-  ["other", "Something else"],
-] as const;
-
-function ReportButton({ prayerId, onReported }: { prayerId: string; onReported(): void }) {
-  const [open, setOpen] = useState(false);
-  const [done, setDone] = useState(false);
-
-  async function report(reason: string) {
-    await api(`/api/prayers/${prayerId}/report`, { body: { reason } }).catch(() => {});
-    setDone(true);
-    setOpen(false);
-    setTimeout(onReported, 1500); // hide it for this person
-  }
-
-  if (done) return <span className="muted report-done">Thank you. We&apos;ll take a look.</span>;
-  return (
-    <div className="report">
-      <button type="button" className="link-button report__toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        Report
-      </button>
-      {open && (
-        <ul className="report__menu">
-          {REPORT_REASONS.map(([value, label]) => (
-            <li key={value}>
-              <button type="button" onClick={() => report(value)}>
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }

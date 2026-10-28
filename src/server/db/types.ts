@@ -79,6 +79,128 @@ export interface ReviewSummary {
 
 export class DuplicateError extends Error {}
 
+// --- Praying for people in places ------------------------------------------
+
+/** A rounded location: a city centre or a whole country. Never exact. */
+export interface AreaRef {
+  kind: "city" | "country";
+  cityId: number | null;
+  cc: string;
+  name: string;
+  lat: number;
+  lon: number;
+}
+
+export type WorldStatus = "published" | "pending" | "rejected" | "hidden";
+
+/** A prayer or blessing sent to a place (optionally answering a request). */
+export interface WorldPrayerRecord {
+  id: string;
+  senderDevice: string;
+  senderUser: string | null;
+  body: string;
+  templateId: string | null;
+  faith: string | null;
+  showFaith: boolean;
+  anonymous: boolean;
+  displayName: string | null;
+  target: AreaRef;
+  /** Where it was sent from (city or country), or null if the sender chose not to share. */
+  origin: AreaRef | null;
+  requestId: string | null;
+  status: WorldStatus;
+  moderationNote: string | null;
+  reportCount: number;
+  createdAt: string;
+}
+
+export type NewWorldPrayer = Omit<WorldPrayerRecord, "id" | "reportCount" | "createdAt">;
+
+/** Someone asking others to pray for them, tied to their (rounded) area. */
+export interface PrayerRequestRecord {
+  id: string;
+  userId: string;
+  body: string;
+  faith: string | null;
+  showFaith: boolean;
+  anonymous: boolean;
+  displayName: string;
+  area: AreaRef;
+  /** public = shown on the globe and lists; unlisted = only via its link. */
+  visibility: "public" | "unlisted";
+  status: WorldStatus;
+  moderationNote: string | null;
+  prayedCount: number;
+  reportCount: number;
+  closed: boolean;
+  createdAt: string;
+}
+
+export type NewPrayerRequest = Omit<PrayerRequestRecord, "id" | "prayedCount" | "reportCount" | "closed" | "createdAt">;
+
+export interface NotificationRecord {
+  id: string;
+  userId: string;
+  kind: "request_prayed" | "area_prayer" | "system";
+  title: string;
+  body: string;
+  link: string | null;
+  createdAt: string;
+  readAt: string | null;
+}
+
+export interface UserSettings {
+  userId: string;
+  /** Home area (city level) for requests and "prayers for your area". */
+  home: AreaRef | null;
+  notifyRequests: boolean; // someone prayed for my request
+  notifyArea: boolean; // someone prayed for my city
+  email: boolean;
+  push: boolean;
+  lastEmailAt: string | null;
+  lastAreaNoticeAt: string | null;
+}
+
+export const defaultSettings = (userId: string): UserSettings => ({
+  userId,
+  home: null,
+  notifyRequests: true,
+  notifyArea: false,
+  email: false,
+  push: false,
+  lastEmailAt: null,
+  lastAreaNoticeAt: null,
+});
+
+export interface PushSubscriptionRecord {
+  id: string;
+  userId: string;
+  kind: "web" | "expo";
+  /** Web push endpoint URL, or Expo push token. */
+  endpoint: string;
+  /** Web push keys as JSON ({ p256dh, auth }). */
+  keys: string | null;
+  createdAt: string;
+}
+
+export interface BlockRecord {
+  id: string;
+  blockerActor: string;
+  blockedActor: string;
+  /** What the person saw when blocking, e.g. "a prayer for Manila" — never the other person's identity. */
+  label: string;
+  createdAt: string;
+}
+
+export interface AreaSummary {
+  toCity: number;
+  toCountry: number;
+  /** Where prayers for this area came from (country codes), most first. */
+  fromCountries: { cc: string; count: number }[];
+}
+
+export type ReportableKind = "world_prayer" | "request";
+
 export interface Store {
   /** "memory" (dev / demo) or "postgres". */
   readonly kind: "memory" | "postgres";
@@ -119,7 +241,7 @@ export interface Store {
   setReviewStatus(id: string, status: ReviewStatus, note?: string | null): Promise<void>;
 
   // --- Moderation queue ---
-  listModerationQueue(): Promise<{ prayers: PrayerRecord[]; reviews: ReviewRecord[] }>;
+  listModerationQueue(): Promise<{ prayers: PrayerRecord[]; reviews: ReviewRecord[]; worldPrayers: WorldPrayerRecord[]; requests: PrayerRequestRecord[] }>;
 
   // --- Accounts ---
   createUser(user: Omit<UserRecord, "id" | "createdAt">): Promise<UserRecord>;
@@ -132,4 +254,61 @@ export interface Store {
   deleteSession(tokenHash: string): Promise<void>;
   /** After sign-in: moves this device's anonymous activity onto the account. */
   mergeDeviceIntoUser(deviceId: string, userId: string): Promise<void>;
+
+  // --- Prayers for places ---
+  createWorldPrayer(p: NewWorldPrayer): Promise<WorldPrayerRecord>;
+  getWorldPrayer(id: string): Promise<WorldPrayerRecord | null>;
+  /** Published prayers, newest first, optionally for one area or request, hiding blocked senders. */
+  listWorldPrayers(opts: {
+    limit: number;
+    before?: string;
+    since?: string;
+    targetCityId?: number;
+    targetCc?: string;
+    requestId?: string;
+    excludeActors?: string[];
+  }): Promise<WorldPrayerRecord[]>;
+  listOwnWorldPrayers(who: Identity): Promise<WorldPrayerRecord[]>;
+  setWorldPrayerStatus(id: string, status: WorldStatus, note?: string | null): Promise<void>;
+  worldStats(): Promise<{ total: number; last24h: number }>;
+  areaSummary(cityId: number | null, cc: string): Promise<AreaSummary>;
+
+  // --- Prayer requests ---
+  createRequest(r: NewPrayerRequest): Promise<PrayerRequestRecord>;
+  getRequest(id: string): Promise<PrayerRequestRecord | null>;
+  listPublicRequests(opts: { limit: number; before?: string; cc?: string; excludeActors?: string[] }): Promise<PrayerRequestRecord[]>;
+  listOwnRequests(userId: string): Promise<PrayerRequestRecord[]>;
+  updateRequest(id: string, changes: Partial<Pick<PrayerRequestRecord, "closed" | "visibility" | "status" | "moderationNote">>): Promise<void>;
+  deleteRequest(id: string): Promise<void>;
+  /** Counts one prayer per actor; returns false if this actor already prayed for it. */
+  addRequestPrayer(requestId: string, actor: string): Promise<boolean>;
+  prayedForRequests(requestIds: string[], actor: string): Promise<Set<string>>;
+
+  // --- Reports & blocks ---
+  addContentReport(kind: ReportableKind, id: string, actor: string, reason: string): Promise<number>;
+  addBlock(blockerActor: string, blockedActor: string, label: string): Promise<void>;
+  listBlocks(blockerActor: string): Promise<BlockRecord[]>;
+  removeBlock(blockerActor: string, id: string): Promise<void>;
+  blockedActors(blockerActor: string): Promise<string[]>;
+  /** Whether `blockerActor` has blocked any of these actors. */
+  isBlocked(blockerActor: string, actors: string[]): Promise<boolean>;
+
+  // --- Notifications & settings ---
+  createNotification(n: Omit<NotificationRecord, "id" | "createdAt" | "readAt">): Promise<NotificationRecord>;
+  listNotifications(userId: string, limit: number): Promise<NotificationRecord[]>;
+  unreadCount(userId: string): Promise<number>;
+  markNotificationsRead(userId: string): Promise<void>;
+  getSettings(userId: string): Promise<UserSettings>;
+  saveSettings(settings: UserSettings): Promise<void>;
+  /** Users whose home is this city and who want area notifications. */
+  usersWatchingCity(cityId: number): Promise<UserSettings[]>;
+  addPushSubscription(sub: Omit<PushSubscriptionRecord, "id" | "createdAt">): Promise<void>;
+  listPushSubscriptions(userId: string): Promise<PushSubscriptionRecord[]>;
+  deletePushSubscription(endpoint: string): Promise<void>;
 }
+
+/** The actor key of whoever wrote something, for blocking. */
+export const senderActor = (r: { senderUser?: string | null; senderDevice?: string; ownerUser?: string | null; ownerDevice?: string }) => {
+  const user = r.senderUser ?? r.ownerUser;
+  return user ? `u:${user}` : `d:${r.senderDevice ?? r.ownerDevice}`;
+};

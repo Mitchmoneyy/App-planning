@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Photo } from "@/server/wikimedia";
 
-export default function PhotoGallery({ photos, placeName }: { photos: Photo[]; placeName: string }) {
+export default function PhotoGallery({ photos, placeName, layout = "strip" }: { photos: Photo[]; placeName: string; layout?: "strip" | "grid" }) {
   const [open, setOpen] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -21,7 +21,7 @@ export default function PhotoGallery({ photos, placeName }: { photos: Photo[]; p
   const current = open !== null ? photos[open] : null;
 
   return (
-    <section className="gallery" aria-label={`Photos of ${placeName}`}>
+    <section className={`gallery gallery--${layout}`} aria-label={`Photos of ${placeName}`}>
       <div className="gallery__strip">
         {photos.map((p, i) => (
           <button key={p.sourceUrl} type="button" className="gallery__thumb" onClick={() => setOpen(i)} aria-label={`Open photo: ${p.title}`}>

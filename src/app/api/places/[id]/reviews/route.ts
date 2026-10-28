@@ -3,7 +3,7 @@
  * POST   /api/places/:id/reviews — write or update my review (signed-in users)
  * DELETE /api/places/:id/reviews — delete my review
  */
-import { getStore, type ReviewStatus } from "@/server/db";
+import { actorKey, getStore, type ReviewStatus } from "@/server/db";
 import { requireUser } from "@/server/auth";
 import { assertSameOrigin, getIdentity, handle, HttpError, privateJson, readJson, requirePlace } from "@/server/http";
 import { cleanText, moderate } from "@/server/moderation";
@@ -14,11 +14,13 @@ export const GET = handle(async (_req: Request, ctx: RouteContext<"/api/places/[
   const place = requirePlace((await ctx.params).id);
   const who = await getIdentity();
   const store = getStore();
-  const [reviews, summary, mine] = await Promise.all([
+  const [all, summary, mine, blocked] = await Promise.all([
     store.listReviews(place.id),
     store.getReviewSummary(place.id),
     who.userId ? store.getUserReview(place.id, who.userId) : null,
+    store.blockedActors(actorKey(who)),
   ]);
+  const reviews = all.filter((r) => !blocked.includes(`u:${r.userId}`));
   return privateJson({
     summary,
     reviews: reviews.map((r) => toReviewView(r, r.userId === who.userId)),

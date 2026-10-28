@@ -6,7 +6,7 @@ import { getPlace } from "@/lib/places.server";
 
 export const GET = handle(async () => {
   await requireAdmin(await getIdentity());
-  const { prayers, reviews } = await getStore().listModerationQueue();
+  const { prayers, reviews, worldPrayers, requests } = await getStore().listModerationQueue();
   const placeName = (id: string) => getPlace(id)?.name ?? id;
   return privateJson({
     prayers: prayers.map((p) => ({
@@ -29,6 +29,26 @@ export const GET = handle(async () => {
       status: r.status,
       note: r.moderationNote,
       createdAt: r.updatedAt,
+    })),
+    worldPrayers: worldPrayers.map((p) => ({
+      id: p.id,
+      placeId: null,
+      placeName: `For ${p.target.name}`,
+      body: p.body,
+      status: p.status,
+      note: p.moderationNote,
+      reports: p.reportCount,
+      createdAt: p.createdAt,
+    })),
+    requests: requests.map((r) => ({
+      id: r.id,
+      placeId: null,
+      placeName: `Request from ${r.area.name}`,
+      body: r.body,
+      status: r.status,
+      note: r.moderationNote,
+      reports: r.reportCount,
+      createdAt: r.createdAt,
     })),
   });
 });
