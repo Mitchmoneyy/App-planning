@@ -161,8 +161,11 @@ const GENERIC_NAME = {
 // OSM writes Wikipedia links as "lang:Title"; the app uses English titles.
 const englishWikipedia = (v) => (v && v.startsWith("en:") ? v.slice(3) : null);
 let unnamed = 0;
-for (const file of filesIn(path.join(IN, "osm"))) {
+let osmRows = 0;
+const osmFiles = filesIn(path.join(IN, "osm"));
+for (const file of osmFiles) {
   for await (const r of lines(file)) {
+    osmRows++;
     const t = r.tags ?? {};
     // Buildings without amenity=place_of_worship must at least have a name to count.
     if (!t.name && t.amenity !== "place_of_worship") continue;
@@ -351,7 +354,12 @@ for (const p of places) {
 }
 const summary = {
   generatedAt: new Date().toISOString(), total: places.length, landmarks: landmarks.length,
-  withFootprint: places.filter((p) => p.footprint).length, byFaith, bySource: stats.bySource, merged: stats.merged, dropped: stats.dropped,
+  withFootprint: places.filter((p) => p.footprint).length, byFaith,
+  osm: {
+    areasDownloaded: osmFiles.length,
+    rowsRead: osmRows,
+    download: fs.existsSync(path.join(IN, "osm", "_report.json")) ? JSON.parse(fs.readFileSync(path.join(IN, "osm", "_report.json"), "utf8")) : null,
+  }, bySource: stats.bySource, merged: stats.merged, dropped: stats.dropped,
   topCountries: Object.fromEntries(Object.entries(byCountry).sort((a, b) => b[1] - a[1]).slice(0, 40)),
 };
 const res = writer.finish(path.join(OUT, "places.pmtiles"), {
