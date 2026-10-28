@@ -10,23 +10,29 @@
     "data:curated": "node scripts/build-curated.mjs",
     "data:fetch": "node --env-file-if-exists=.env.local scripts/fetch-wikidata.mjs",
     "data:land": "node scripts/build-land.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/db-migrate.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "maplibre-gl": "^5.24.0",
     "next": "16.4.3",
+    "postgres": "^3.4.9",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "topojson-client": "^3.1.0",
     "typescript": "^5",
+    "vitest": "^5.0.5",
     "world-atlas": "^2.0.2"
   }
 }

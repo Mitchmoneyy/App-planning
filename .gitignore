@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Template with no secrets — safe to commit
 !.env.example
+
+# Local development database (built-in store)
+/.data/

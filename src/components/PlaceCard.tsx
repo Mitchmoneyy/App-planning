@@ -2,6 +2,7 @@
 
 /** Preview card shown when a place is tapped on the globe. */
 import Link from "next/link";
+import FavoriteButton from "./FavoriteButton";
 import { faithColor, faithLabel } from "@/lib/faiths";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import type { LngLat, Place } from "@/lib/types";
@@ -33,9 +34,15 @@ export default function PlaceCard({ place, userLocation, onClose }: Props) {
       </p>
       {place.heritage && <p className="heritage-badge">UNESCO World Heritage</p>}
 
-      <Link className="primary-button" href={`/place/${place.id}`}>
-        Visit this place
-      </Link>
+      <div className="place-card__actions">
+        <Link className="primary-button" href={`/place/${place.id}`}>
+          Visit
+        </Link>
+        <Link className="secondary-button" href={`/place/${place.id}/pray`}>
+          <span aria-hidden="true">🕯</span> Pray
+        </Link>
+        <FavoriteButton placeId={place.id} compact />
+      </div>
     </article>
   );
 }

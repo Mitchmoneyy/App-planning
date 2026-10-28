@@ -24,6 +24,9 @@
   --page-text: #1f2433;
   --page-muted: #5d6475;
   --link: #8a5a14;
+  --card-bg: #ffffff;
+  --card-border: rgba(31, 36, 51, 0.1);
+  --danger: #b42318;
 
   --radius: 16px;
   --shadow: 0 10px 30px rgba(5, 8, 20, 0.28);
@@ -44,6 +47,9 @@
     --page-text: #f1ece0;
     --page-muted: #a9b0c2;
     --link: #e6c587;
+    --card-bg: #141b33;
+    --card-border: rgba(241, 236, 224, 0.12);
+    --danger: #f97066;
   }
 }
 
@@ -279,6 +285,7 @@ a {
   color: #1a1406;
   font-weight: 600;
   text-decoration: none;
+  gap: 6px;
 }
 
 .primary-button:hover {
@@ -558,21 +565,135 @@ a {
   margin-bottom: max(0px, env(safe-area-inset-bottom));
 }
 
-/* ---------- Place detail page ---------- */
+/* ==========================================================================
+   Content pages (detail, my sanctuary, sign-in, about…)
+   ========================================================================== */
 
-.place-page {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: max(16px, env(safe-area-inset-top)) 16px 48px;
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-.place-page__nav {
-  padding: 8px 0 16px;
+.muted {
+  color: var(--page-muted);
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--page-muted);
+}
+
+.prose {
+  line-height: 1.65;
+  margin: 0 0 12px;
+  white-space: pre-line;
+}
+
+.lede {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  margin: 0 0 10px;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.stack-lg {
+  display: grid;
+  gap: 20px;
+}
+
+.stack-lg h1,
+.narrow-page h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ---------- Site header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+  background: color-mix(in srgb, var(--page-bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.site-header.is-dark {
+  background: rgba(8, 11, 22, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: var(--ivory);
+}
+
+.site-header__brand {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  color: inherit;
+}
+
+.site-header__brand span {
+  color: var(--gold);
+}
+
+.site-header__nav {
+  display: flex;
+  gap: 18px;
+}
+
+.site-header__nav a {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 0;
+}
+
+.demo-banner {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--page-muted);
+}
+
+.site-header.is-dark .demo-banner {
+  color: #a9b0c2;
+}
+
+/* ---------- Layout containers ---------- */
+
+.place-page,
+.narrow-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 16px 64px;
+  display: grid;
+  gap: 18px;
+}
+
+.narrow-page {
+  max-width: 640px;
 }
 
 .back-link {
   text-decoration: none;
   font-weight: 600;
+  justify-self: start;
 }
 
 .place-page .faith-tag {
@@ -593,10 +714,143 @@ a {
   font-size: 1.05rem;
 }
 
-.mini-map {
-  height: 280px;
-  margin: 16px 0 24px;
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius);
+  padding: 20px;
+  min-width: 0;
+}
+
+.card h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.35rem;
+  margin: 0 0 12px;
+}
+
+.card__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.notice {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+}
+
+.link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 12px 0 0;
+}
+
+.link-row a {
+  padding: 4px 0;
+}
+
+.small-link {
+  font-size: 0.9rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.secondary-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.danger-button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.favorite-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--page-text);
+  font-weight: 600;
+}
+
+.favorite-button.is-on {
+  color: #c2410c;
+  border-color: #fdba74;
+}
+
+.favorite-button.is-compact {
+  width: 46px;
+  padding: 0;
+  justify-content: center;
+  background: transparent;
+  border-color: var(--panel-border);
+  color: var(--panel-text);
+}
+
+.favorite-button.is-compact.is-on {
+  color: #c2410c;
+}
+
+/* ---------- Detail page pieces ---------- */
+
+.place-actions {
+  margin-top: 14px;
+}
+
+.place-actions__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.place-actions__stats {
+  margin: 10px 0 0;
+  min-height: 1.4em;
+  color: var(--page-muted);
+  font-size: 0.92rem;
+}
+
+.mini-map {
+  height: 240px;
+  margin: 0 0 14px;
+  border-radius: 12px;
   overflow: hidden;
   background: #dfe6ee;
 }
@@ -605,25 +859,974 @@ a {
   background: linear-gradient(90deg, #dfe6ee, #edf1f5, #dfe6ee);
 }
 
-.place-page__section h2 {
-  font-family: var(--font-serif);
-  font-weight: 500;
-  margin: 0 0 8px;
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 20px;
+  margin: 14px 0 0;
 }
 
-.place-page .hint {
+.facts dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--page-muted);
 }
 
-.link-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 12px;
-  display: grid;
-  gap: 4px;
+.facts dd {
+  margin: 2px 0 0;
 }
 
-.link-list a {
-  display: inline-block;
-  padding: 8px 0;
+.history-section {
+  border-top: 1px solid var(--card-border);
+  padding: 10px 0;
+}
+
+.history-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 6px 0;
+}
+
+.history-section[open] summary {
+  margin-bottom: 8px;
+}
+
+.attribution {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--page-muted);
+  line-height: 1.5;
+}
+
+.skeleton {
+  display: grid;
+  gap: 8px;
+}
+
+.skeleton span {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--card-border), transparent, var(--card-border));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Gallery */
+
+.gallery__strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: var(--radius);
+  scrollbar-width: thin;
+}
+
+.gallery__thumb {
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+  scroll-snap-align: start;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gallery__thumb img {
+  display: block;
+  height: 220px;
+  width: auto;
+  max-width: 80vw;
+  object-fit: cover;
+}
+
+.gallery__credit {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: var(--page-muted);
+}
+
+.lightbox {
+  width: min(1100px, 100vw);
+  max-height: 100vh;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ivory);
+}
+
+.lightbox::backdrop {
+  background: rgba(5, 8, 18, 0.92);
+}
+
+.lightbox figure {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.lightbox img {
+  width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+}
+
+.lightbox figcaption {
+  display: grid;
+  gap: 4px;
+  font-size: 0.88rem;
+}
+
+.lightbox figcaption a {
+  color: #e6c587;
+}
+
+.lightbox__desc {
+  color: #c9cfdc;
+}
+
+.lightbox__controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.lightbox__controls button {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+}
+
+/* Travel */
+
+.estimates {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.estimates dt {
+  font-size: 0.8rem;
+  color: var(--page-muted);
+}
+
+.estimates dd {
+  margin: 2px 0 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.estimates dd .muted {
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.nights {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nights select,
+.field input,
+.field textarea {
+  font: inherit;
+  font-size: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--page-bg);
+  color: var(--page-text);
+}
+
+.total {
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+}
+
+/* Reviews */
+
+.rating-summary {
+  margin: 0;
+}
+
+.stars {
+  color: #d97706;
+  letter-spacing: 1px;
+}
+
+.stars__empty {
+  color: var(--card-border);
+}
+
+.review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.review {
+  border-top: 1px solid var(--card-border);
+  padding: 12px 0 4px;
+}
+
+.review__head {
+  margin: 0 0 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tag {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--panel-text);
+}
+
+.review-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 14px;
+}
+
+.star-input {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 2px;
+}
+
+.star-input legend {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.star-input label {
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--card-border);
+  padding: 2px;
+}
+
+.star-input label.is-on {
+  color: #d97706;
+}
+
+.star-input input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.star-input label:has(input:focus-visible) {
+  outline: 3px solid var(--gold);
+  border-radius: 6px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field > span {
+  font-weight: 600;
+}
+
+.field small {
+  color: var(--page-muted);
+}
+
+.form-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.form-message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+}
+
+.form-message.is-error {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+
+.external-reviews {
+  border-top: 1px solid var(--card-border);
+  padding-top: 12px;
+  margin-top: 16px;
+}
+
+/* ---------- Sign in ---------- */
+
+.auth-card h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+}
+
+.tabs button {
+  flex: 1;
+  min-height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--panel-text);
+  font-weight: 600;
+}
+
+.tabs button.is-on {
+  background: var(--card-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- My sanctuary ---------- */
+
+.saved-list,
+.own-prayers,
+.queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.saved-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.saved-list__text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.own-prayers li,
+.queue li {
+  border-top: 1px solid var(--card-border);
+  padding: 12px 0;
+}
+
+.own-prayers__head,
+.queue__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 6px;
+}
+
+.own-prayers__meta {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.status {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--panel-text);
+}
+
+.status--published {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.status--pending {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+.status--rejected,
+.status--hidden {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.danger-zone {
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+.prose-page {
+  line-height: 1.65;
+}
+
+.prose-page h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  margin: 18px 0 0;
+}
+
+/* ---------- Globe additions ---------- */
+
+.me-button {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  box-shadow: var(--shadow);
+}
+
+.place-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.place-card__actions .primary-button {
+  flex: 1;
+}
+
+.place-card__actions .secondary-button {
+  min-height: 46px;
+  color: var(--panel-text);
+}
+
+/* ==========================================================================
+   Prayer space: night, warm candlelight, unhurried
+   ========================================================================== */
+
+.pray-page {
+  min-height: 100vh;
+  color: #f1ece0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(217, 178, 111, 0.12), transparent 70%),
+    radial-gradient(ellipse 120% 60% at 50% 20%, #141b33, #070a14 75%),
+    #070a14;
+}
+
+/* The prayer page is dark from edge to edge, even when scrolled past the content. */
+body:has(.pray-page) {
+  background: #070a14;
+}
+
+.pray-page a {
+  color: #e6c587;
+}
+
+.sanctuary {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+  display: grid;
+  gap: 28px;
+}
+
+.sanctuary__back {
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.sanctuary__header {
+  text-align: center;
+  display: grid;
+  gap: 6px;
+}
+
+.sanctuary__header .sanctuary__back {
+  justify-self: start;
+}
+
+.sanctuary__header h1 {
+  margin: 12px 0 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
+  line-height: 1.2;
+}
+
+.sanctuary__where {
+  margin: 0;
+  color: #a9b0c2;
+}
+
+.sanctuary h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.4rem;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.sanctuary__footer {
+  text-align: center;
+  color: #a9b0c2;
+  font-size: 0.9rem;
+}
+
+/* Candle */
+
+.candle-area {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding-top: 20px;
+}
+
+.candle-field {
+  position: absolute;
+  inset: auto 0 150px 0;
+  height: 60px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.mini-flame {
+  position: absolute;
+  width: 5px;
+  height: 9px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 70%, #fff6d6, #ffb347 60%, transparent 70%);
+  box-shadow: 0 0 8px 2px rgba(255, 179, 71, 0.45);
+  animation: flicker 2.4s infinite ease-in-out;
+}
+
+.candle {
+  position: relative;
+  width: 70px;
+  height: 190px;
+}
+
+.candle__body {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  width: 50px;
+  height: 130px;
+  border-radius: 6px 6px 4px 4px;
+  background: linear-gradient(90deg, #e9dfc8, #fbf6ea 45%, #d9cdb2);
+  box-shadow: inset 0 6px 6px -4px rgba(0, 0, 0, 0.12);
+}
+
+.candle__wick {
+  position: absolute;
+  bottom: 128px;
+  left: 33px;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: #3a2c1a;
+}
+
+.candle__flame {
+  position: absolute;
+  bottom: 138px;
+  left: 23px;
+  width: 24px;
+  height: 46px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(ellipse at 50% 75%, #ffffff 0%, #fff3c4 25%, #ffc35c 55%, rgba(255, 140, 40, 0.85) 75%, transparent 80%);
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transform: scale(0.2);
+  transition:
+    opacity 0.8s ease,
+    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.candle__glow {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 92, 0.35), rgba(255, 196, 92, 0.08) 45%, transparent 70%);
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.candle.is-lit .candle__flame {
+  opacity: 1;
+  transform: scale(1);
+  animation: flicker 3s 1.2s infinite ease-in-out;
+}
+
+.candle.is-lit .candle__glow {
+  opacity: 1;
+  animation: breathe 5s 1.6s infinite ease-in-out;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(-1deg);
+  }
+  25% {
+    transform: scale(1.04, 0.96) rotate(1.5deg);
+  }
+  50% {
+    transform: scale(0.97, 1.05) rotate(-0.5deg);
+  }
+  75% {
+    transform: scale(1.02, 0.98) rotate(1deg);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candle.is-lit .candle__flame,
+  .candle.is-lit .candle__glow,
+  .mini-flame {
+    animation: none;
+  }
+  .candle__flame,
+  .candle__glow {
+    transition: none;
+  }
+}
+
+.candle-count {
+  margin: 0;
+  text-align: center;
+  color: #c9cfdc;
+  line-height: 1.6;
+  min-height: 3.2em;
+}
+
+.candle-count strong {
+  color: #fff3c4;
+}
+
+.light-button {
+  min-height: 50px;
+  padding: 0 28px;
+  border: 1px solid rgba(255, 214, 140, 0.6);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 214, 140, 0.22), rgba(255, 214, 140, 0.08));
+  color: #fff3c4;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 24px rgba(255, 196, 92, 0.15);
+}
+
+.light-button:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 214, 140, 0.32), rgba(255, 214, 140, 0.12));
+}
+
+.light-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.candle-message {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: #e6c587;
+}
+
+/* Prayer form */
+
+.prayer-form-area,
+.wall {
+  background: rgba(20, 27, 51, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.prayer-form {
+  display: grid;
+  gap: 12px;
+}
+
+.prayer-form textarea,
+.share-options input {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(5, 8, 18, 0.55);
+  color: #f1ece0;
+  resize: vertical;
+}
+
+.prayer-form textarea {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+}
+
+.prayer-form textarea::placeholder {
+  color: #7d8597;
+}
+
+.char-count {
+  margin: -6px 0 0;
+  text-align: right;
+  font-size: 0.75rem;
+  color: #7d8597;
+}
+
+.choice {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .choice {
+    grid-template-columns: 1fr;
+  }
+}
+
+.choice label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+}
+
+.choice label.is-on {
+  border-color: rgba(255, 214, 140, 0.7);
+  background: rgba(255, 214, 140, 0.08);
+}
+
+.choice input {
+  margin-top: 4px;
+  accent-color: var(--gold);
+}
+
+.choice span {
+  display: grid;
+}
+
+.choice small {
+  color: #a9b0c2;
+}
+
+.share-options {
+  display: grid;
+  gap: 10px;
+}
+
+.share-options .toggle input {
+  width: 20px;
+  height: 20px;
+}
+
+.share-options .field > span {
+  font-weight: 500;
+}
+
+.pray-page .hint {
+  color: #a9b0c2;
+}
+
+.prayer-form .light-button {
+  justify-self: center;
+}
+
+.prayer-result {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 214, 140, 0.1);
+  border: 1px solid rgba(255, 214, 140, 0.3);
+  text-align: center;
+  font-family: var(--font-serif);
+}
+
+.prayer-result p {
+  margin: 0;
+}
+
+.prayer-result.is-error {
+  background: rgba(249, 112, 102, 0.1);
+  border-color: rgba(249, 112, 102, 0.4);
+  font-family: inherit;
+}
+
+.support-note {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(91, 141, 239, 0.12);
+  border: 1px solid rgba(91, 141, 239, 0.45);
+  line-height: 1.55;
+}
+
+.support-note p {
+  margin: 0 0 8px;
+}
+
+/* Prayer wall */
+
+.wall__list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.wall__item {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(5, 8, 18, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wall__body {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.wall__meta {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: #8f97aa;
+}
+
+.wall__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pray-for {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 140, 0.4);
+  background: transparent;
+  color: #f1ece0;
+  font-size: 0.88rem;
+}
+
+.pray-for.is-on {
+  background: rgba(255, 214, 140, 0.14);
+  color: #fff3c4;
+}
+
+.pray-for:disabled {
+  cursor: default;
+}
+
+.pray-for__count {
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 214, 140, 0.2);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.report {
+  position: relative;
+}
+
+.pray-page .link-button {
+  color: #8f97aa;
+  font-size: 0.82rem;
+}
+
+.report__menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  z-index: 5;
+  min-width: 250px;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border-radius: 12px;
+  background: #1b2340;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow);
+}
+
+.report__menu button {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #f1ece0;
+}
+
+.report__menu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.report-done {
+  font-size: 0.82rem;
+}
+
+.wall .secondary-button {
+  justify-self: center;
+  width: 100%;
+}
+
+.pray-page .muted {
+  color: #a9b0c2;
 }

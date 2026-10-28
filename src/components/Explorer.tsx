@@ -5,6 +5,7 @@
  * Owns the app state; the globe itself is in GlobeMap.
  */
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { distanceKm } from "@/lib/geo";
@@ -133,6 +134,12 @@ export default function Explorer() {
           >
             Filters{filterCount > 0 && <span className="badge">{filterCount}</span>}
           </button>
+          <Link href="/me" className="me-button" aria-label="My sanctuary: saved places and prayers" title="My sanctuary">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M4.5 20c1.2-3.8 4.2-5.5 7.5-5.5s6.3 1.7 7.5 5.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </Link>
         </div>
       </div>
 
