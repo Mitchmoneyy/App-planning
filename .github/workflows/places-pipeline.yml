@@ -2,10 +2,9 @@
 # Overture Maps + OpenStreetMap + approved user suggestions -> de-duplicated,
 # normalised -> vector tiles (PMTiles) -> published -> loaded into Postgres.
 #
-# Runs by itself. Every night it checks the latest published stats: while the
-# OpenStreetMap download isn't complete it runs again (each run continues
-# where the last stopped), and on the 2nd of each month it refreshes
-# everything. Once complete, nights in between are skipped in seconds.
+# Runs by itself. Every night it checks the latest published stats: if the
+# last build didn't include all of OpenStreetMap it runs again, and on the
+# 2nd of each month it refreshes everything. Otherwise it skips in seconds.
 # The site reads .../releases/latest/download/places.pmtiles, which always
 # points at the newest build.
 #
@@ -22,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       osm:
-        description: "Also download OpenStreetMap via Overpass (up to ~3 h per run; resumes next run)"
+        description: "Also include OpenStreetMap (Geofabrik region files, ~1-2 h)"
         type: boolean
         default: true
 
@@ -75,29 +74,24 @@ jobs:
       - name: Overture Maps places (~10 min)
         run: python pipeline/overture_places.py --release latest --out pipeline/in/overture
 
-      # The full OpenStreetMap download can take longer than one run allows, so
-      # progress is cached: each run continues where the last one stopped, and
-      # the tiles are built from whatever has been downloaded so far.
-      - name: Restore OpenStreetMap progress
+      # Every OpenStreetMap place of worship, from Geofabrik's region files
+      # (about 80 GB downloaded one region at a time, filtered with osmium).
+      - name: Free disk space for the OpenStreetMap downloads
         if: ${{ github.event_name == 'schedule' || inputs.osm }}
-        uses: actions/cache/restore@v4
-        with:
-          path: pipeline/in/osm
-          key: osm-${{ github.run_id }}
-          restore-keys: osm-
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
 
-      - name: OpenStreetMap places of worship + building outlines (Overpass)
+      - name: OpenStreetMap places of worship + building outlines (Geofabrik + osmium)
         if: ${{ github.event_name == 'schedule' || inputs.osm }}
-        continue-on-error: true
-        timeout-minutes: 215
-        run: node pipeline/osm_overpass.mjs --out pipeline/in/osm --max-minutes 200
-
-      - name: Save OpenStreetMap progress
-        if: ${{ always() && (github.event_name == 'schedule' || inputs.osm) }}
-        uses: actions/cache/save@v4
-        with:
-          path: pipeline/in/osm
-          key: osm-${{ github.run_id }}
+        timeout-minutes: 200
+        run: |
+          sudo apt-get install -y -q osmium-tool
+          rm -rf pipeline/in/osm
+          # /mnt is the runner's large scratch disk
+          sudo mkdir -p /mnt/osm && sudo chown "$USER" /mnt/osm
+          df -h /mnt
+          bash pipeline/osm_extracts.sh /mnt/osm
 
       - name: Building outlines for landmarks (Overture Buildings)
         continue-on-error: true

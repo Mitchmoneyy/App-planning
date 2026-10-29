@@ -164,9 +164,13 @@ const englishWikipedia = (v) => (v && v.startsWith("en:") ? v.slice(3) : null);
 let unnamed = 0;
 let osmRows = 0;
 const osmFiles = filesIn(path.join(IN, "osm"));
+const osmSeen = new Set(); // regions overlap at their borders
 for (const file of osmFiles) {
   for await (const r of lines(file)) {
     osmRows++;
+    const key = `${r.type}/${r.id}`;
+    if (osmSeen.has(key)) continue;
+    osmSeen.add(key);
     const t = r.tags ?? {};
     // Buildings without amenity=place_of_worship must at least have a name to count.
     if (!t.name && t.amenity !== "place_of_worship") continue;
