@@ -39,7 +39,7 @@ const RELIGIOUS_BUILDINGS = "church|cathedral|chapel|mosque|temple|synagogue|shr
 // nodes as points, ways with their outline, relations (big complexes) as a centre point.
 function query([s, w, n, e]) {
   const bb = `${s},${w},${n},${e}`;
-  return `[out:json][timeout:300];
+  return `[out:json][timeout:180];
 (
   nwr["amenity"="place_of_worship"](${bb});
   wr["building"~"^(${RELIGIOUS_BUILDINGS})$"]["name"](${bb});
@@ -91,17 +91,28 @@ async function fetchTile(bbox, depth = 0) {
   if (fs.existsSync(file) && Date.now() - fs.statSync(file).mtimeMs < MAX_AGE_MS) return; // fresh enough
   // Known to be too big for one request: go straight to its quarters.
   if (report.split.includes(name) && depth < 7) return split(bbox, depth);
+  // Requests that time out (a 504, or the connection dropping after minutes)
+  // usually mean the area is too dense for one request: after two, split it.
+  let slow = 0;
+  const splitSlow = (why) => {
+    noteError("slow-split", `${name} (${why})`);
+    if (!report.split.includes(name)) report.split.push(name);
+    saveReport();
+    return split(bbox, depth);
+  };
   for (let attempt = 0; attempt < 6; attempt++) {
     if (Date.now() >= DEADLINE) {
       outOfTime = true;
       return;
     }
     let res, text;
+    const started = Date.now();
     try {
       res = await fetch(ENDPOINTS[current], { method: "POST", body: new URLSearchParams({ data: query(bbox) }), headers: { "User-Agent": "GlobalSanctuary/1.0 (places pipeline)" } });
       text = await res.text();
     } catch (err) {
       noteError("network", err);
+      if (Date.now() - started > 120_000 && ++slow >= 2 && depth < 7) return splitSlow("dropped");
       nextServer();
       await sleep(10_000 * (attempt + 1));
       continue;
@@ -114,6 +125,7 @@ async function fetchTile(bbox, depth = 0) {
     }
     if (res.status === 429 || res.status === 502 || res.status === 503 || res.status === 504) {
       noteError(`busy-${res.status}`, `${ENDPOINTS[current]} ${text.slice(0, 120)}`);
+      if (res.status === 504 && ++slow >= 2 && depth < 7) return splitSlow("504");
       nextServer(); // this server is busy: try the next one
       await sleep(attempt < ENDPOINTS.length ? 5_000 : 30_000 * (attempt + 1));
       continue;
