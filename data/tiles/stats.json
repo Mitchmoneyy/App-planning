@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T18:14:19.184Z",
+  "generatedAt": "2026-10-29T03:31:28.331Z",
   "total": 33361,
   "landmarks": 323,
   "withFootprint": 3171,
@@ -16,6 +16,11 @@
     "chinese": 6,
     "zoroastrianism": 3,
     "other": 57
+  },
+  "osm": {
+    "areasDownloaded": 0,
+    "rowsRead": 0,
+    "download": null
   },
   "bySource": {
     "curated": 323,

@@ -100,6 +100,14 @@ osmium export worship.osm.pbf -f geojsonseq -o worship.geojsonseq
 Then convert each feature to the `{ type, id, lon, lat, tags, geometry }` lines
 that `osm_overpass.mjs` writes.
 
+## Search index
+
+Each build also writes `search.idx` (about 160 MB for the world): every place's
+name, broken into words and filed under the first 2–3 letters of each word.
+The server reads the small header once, then only the piece a search needs,
+with HTTP range requests, so searching 1.5M places needs no database. It sits
+next to `places.pmtiles` (same release), and the app finds it automatically.
+
 ## Hosting the tiles
 
 | Option | Cost | Notes |

@@ -18,7 +18,7 @@ import { FetchSource, PMTiles, type RangeResponse, type Source } from "pmtiles";
 
 export const PLACE_TILE_ZOOM = 12;
 
-class FileSource implements Source {
+export class FileSource implements Source {
   constructor(private path: string) {}
   getKey() {
     return this.path;

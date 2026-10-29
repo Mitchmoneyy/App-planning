@@ -87,7 +87,7 @@ Plain Postgres through our own API routes, rather than Firebase:
 |---|---|---|---|---|
 | Places of worship | Overture Maps (1.5M) + OpenStreetMap + Wikidata, via `pipeline/` | Free | — | CDLA-Permissive / ODbL (share-alike: publish the merged data under ODbL) / CC0 |
 | Places tiles hosting | Cloudflare R2 (or a GitHub release) | ~$0/month (R2: no egress fees, 10M reads free) | `PLACES_PMTILES_URL` | 240 MB file; a 33k-place sample ships in the repo |
-| Places search (all 1.5M) | Supabase Postgres + PostGIS + trigram index | Free tier fits; Pro $25/month for comfort | `DATABASE_URL` | `npm run db:places`; without it, search covers landmarks, cities and places on screen |
+| Places search (all 1.5M) | A search index the pipeline publishes next to the tiles (`search.idx`), read in small pieces; or Supabase Postgres (trigram index) if you prefer | Free | none (`DATABASE_URL` optional) | Works with no database: the server reads only the piece of the index a search needs |
 | Globe imagery & map | **Mapbox** (satellite, streets, 3D buildings, terrain) | 50,000 loads/month free, then ~$5 per 1,000 (volume discounts) | `NEXT_PUBLIC_MAPBOX_TOKEN` (public, URL-restricted) | Without it: free NASA + Sentinel-2 imagery and OpenFreeMap |
 | Photoreal 3D close-ups | Google Map Tiles API (Photorealistic 3D Tiles) | Billed per 3D session after a free monthly allowance (check Google's current pricing) | `NEXT_PUBLIC_GOOGLE_MAPS_3D_KEY` (browser key, Map Tiles API only, URL-restricted) | Only charged when someone opens "3D"; coverage ~2,500 cities |
 | Night lights | NASA Black Marble (GIBS) | Free | — | Public domain |

@@ -119,7 +119,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: auto
-        run: aws s3 cp pipeline/out/world/places.pmtiles "s3://$R2_BUCKET/places.pmtiles" --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          for f in places.pmtiles search.idx stats.json; do
+            aws s3 cp "pipeline/out/world/$f" "s3://$R2_BUCKET/$f" --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          done
 
       - name: Publish tiles to a GitHub release
         if: ${{ env.R2_BUCKET == '' }}
@@ -129,7 +132,7 @@ jobs:
           tag="places-$(date -u +%Y-%m)"
           # Each month gets its own release; the newest is "latest", which the site reads.
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --latest --title "Places of worship $(date -u +%B\ %Y)" --notes-file pipeline/out/world/stats.json
-          gh release upload "$tag" pipeline/out/world/places.pmtiles pipeline/out/world/stats.json --clobber
+          gh release upload "$tag" pipeline/out/world/places.pmtiles pipeline/out/world/search.idx pipeline/out/world/stats.json --clobber
 
       - name: Load the places table (search, near me)
         if: ${{ env.DATABASE_URL != '' }}

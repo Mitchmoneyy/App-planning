@@ -4,14 +4,16 @@
  * - "mosques in Istanbul", "gurdwara london", "temples": a faith word becomes a
  *   faith filter; the rest is the place or area to look in.
  * - Cities and countries: GeoNames (every city over 15,000 people).
- * - Places: famous landmarks always; all 1.5M+ places when the places table is
- *   loaded into Postgres (trigram name search, nearest first). The browser
- *   also adds matches from the map tiles already loaded around the view.
+ * - Places: famous landmarks always, plus every place: from Postgres when the
+ *   places table is loaded (trigram search), otherwise from the published
+ *   search index (no database needed). The browser also adds matches from the
+ *   map tiles already loaded around the view.
  */
 import "server-only";
 import postgres from "postgres";
 import { cityIndex } from "./geo";
 import { countryName } from "@/lib/cities";
+import { searchIndex } from "./searchIndex";
 import type { FaithKey } from "@/lib/faiths";
 import { getCuratedPlace, getCuratedPlaceIds } from "@/lib/places.server";
 import type { SearchHit } from "@/lib/apiTypes";
@@ -51,9 +53,11 @@ function db() {
   return sql;
 }
 
-async function searchDb(text: string, faith: FaithKey | null, near: { lat: number; lon: number } | null, limit: number): Promise<SearchHit[]> {
+/** null = no database (or no places table): use the search index instead. */
+async function searchDb(text: string, faith: FaithKey | null, near: { lat: number; lon: number } | null, limit: number): Promise<SearchHit[] | null> {
   const s = db();
-  if (!s || text.length < 2) return [];
+  if (!s) return null;
+  if (text.length < 2) return [];
   try {
     const point = near ? s`st_setsrid(st_makepoint(${near.lon}, ${near.lat}), 4326)::geography` : null;
     const rows = await s`
@@ -72,7 +76,7 @@ async function searchDb(text: string, faith: FaithKey | null, near: { lat: numbe
       detail: [r.city, r.country ?? (r.cc ? countryName(r.cc as string) : null)].filter(Boolean).join(", "),
     }));
   } catch {
-    return []; // places table not loaded yet
+    return null; // places table not loaded yet
   }
 }
 
@@ -101,7 +105,12 @@ export async function search(raw: string, near: { lat: number; lon: number } | n
       )
     : [];
   const landmarks = searchLandmarks(text, faith, 6);
-  const places = await searchDb(text, faith, near, 10);
+  const places =
+    (await searchDb(text, faith, near, 10)) ??
+    (await searchIndex(text, faith, near, 10).catch((err) => {
+      console.warn("Search index unavailable", err);
+      return [];
+    })).map((h) => ({ kind: "place" as const, ...h, faith: h.faith as FaithKey }));
   const seen = new Set<string>();
   const placeHits = [...landmarks, ...places].filter((h) => h.kind !== "place" || (!seen.has(h.id) && seen.add(h.id)));
   // An area first when the query names one exactly ("Istanbul"), else places first.

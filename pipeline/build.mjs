@@ -26,6 +26,7 @@ import Supercluster from "supercluster";
 import vtpbf from "vt-pbf";
 import { fromOsm, fromOverture } from "./lib/faith.mjs";
 import { PMTilesWriter } from "./lib/pmtiles-writer.mjs";
+import { writeSearchIndex } from "./lib/search-index.mjs";
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a, i, all) => (a.startsWith("--") ? [a.slice(2), all[i + 1]?.startsWith("--") || all[i + 1] === undefined ? true : all[i + 1]] : null)).filter(Boolean),
@@ -375,6 +376,20 @@ const res = writer.finish(path.join(OUT, "places.pmtiles"), {
   },
 });
 log("pmtiles", res);
+
+// Search index (searching every place without a database).
+const regions = new Intl.DisplayNames(["en"], { type: "region" });
+const regionName = (cc) => {
+  try {
+    return regions.of(cc.toUpperCase()) ?? cc;
+  } catch {
+    return cc;
+  }
+};
+const idx = writeSearchIndex(places, path.join(OUT, "search.idx"), {
+  detail: (p) => [p.city, p.country ?? (p.cc ? regionName(p.cc) : null)].filter(Boolean).join(", "),
+});
+log("search index", idx);
 
 // Rows for the database / search.
 const gz = zlib.createGzip();
