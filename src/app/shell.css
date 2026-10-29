@@ -1798,3 +1798,95 @@
 .shell.has-panel .globe-canvas :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) {
   right: calc(min(460px, 40vw) + 44px);
 }
+
+/* ---------- Place card (click a place on the map) ---------- */
+
+.place-preview {
+  position: absolute;
+  left: 24px;
+  bottom: 84px;
+  z-index: 12;
+  width: 380px;
+  max-height: calc(100vh - 170px);
+  overflow-y: auto;
+  border-radius: 20px;
+  animation: preview-in 0.25s ease-out;
+}
+
+@keyframes preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.place-preview__photo {
+  display: block;
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 20px 20px 0 0;
+}
+
+.place-preview__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  background: var(--glass-bg);
+  border-radius: 50%;
+}
+
+.place-preview__body {
+  padding: 16px 20px 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.place-preview .faith-tag {
+  color: var(--glass-muted);
+  padding-right: 30px;
+}
+
+.place-preview__name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.place-preview__where {
+  margin: 0;
+  color: var(--glass-muted);
+  font-size: 0.92rem;
+}
+
+.place-preview__blurb {
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.place-preview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.place-preview__actions .primary-button,
+.place-preview__actions .secondary-button {
+  text-decoration: none;
+}
+
+.place-preview__links {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+}
+
+.place-preview__credit {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--glass-muted);
+}

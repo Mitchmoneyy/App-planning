@@ -373,3 +373,26 @@
     scrollbar-width: none;
   }
 }
+
+@media (max-width: 760px) {
+  .place-preview {
+    left: 0;
+    right: 0;
+    bottom: var(--nav-h);
+    width: auto;
+    max-height: 64vh;
+    border-radius: 22px 22px 0 0;
+    background: var(--sheet-bg);
+  }
+
+  .place-preview__photo {
+    height: 140px;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .place-preview__actions > * {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+}

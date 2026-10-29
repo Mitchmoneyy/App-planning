@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FilterPanel, { activeFilterCount, EMPTY_FILTERS, type Filters } from "../FilterPanel";
 import { useMe } from "../MeProvider";
 import NotificationBell from "../NotificationBell";
+import PlacePreview from "./PlacePreview";
 import SearchBar from "../SearchBar";
 import { ThemeToggle, useTheme } from "../ThemeProvider";
 import { GlobeContext, type GlobeContextValue } from "./GlobeContext";
@@ -117,7 +118,25 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
     [globeApi, router],
   );
 
-  const onPlaceClick = useCallback((p: PlaceSummary) => router.push(`/place/${encodeURIComponent(p.id)}`), [router]);
+  // Clicking a place shows its card; "Arrive" on the card opens the full view.
+  const [preview, setPreview] = useState<PlaceSummary | null>(null);
+  const onPlaceClick = useCallback(
+    (p: PlaceSummary) => {
+      setPreview(p);
+      globeApi?.highlight({ id: p.id, lat: p.lat, lon: p.lon });
+    },
+    [globeApi],
+  );
+  const closePreview = useCallback(() => {
+    setPreview(null);
+    globeApi?.highlight(null);
+  }, [globeApi]);
+  // Leaving the map (to a place, or another screen) closes the card.
+  const [previewPath, setPreviewPath] = useState(pathname);
+  if (previewPath !== pathname) {
+    setPreviewPath(pathname);
+    if (preview) setPreview(null);
+  }
 
   const ctx: GlobeContextValue = useMemo(
     () => ({
@@ -155,7 +174,10 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
           onReady={setGlobeApi}
           onPlaceClick={onPlaceClick}
           onRequestClick={(id) => router.push(`/world/requests/${id}`)}
-          onGlobeClick={(lat, lon) => clickHandler.current?.(lat, lon)}
+          onGlobeClick={(lat, lon) => {
+            if (preview) closePreview();
+            clickHandler.current?.(lat, lon);
+          }}
         />
 
         {!immersive && (
@@ -243,6 +265,16 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
         )}
 
         {children}
+
+        {preview && !immersive && (
+          <PlacePreview
+            key={preview.id}
+            summary={preview}
+            userLocation={location}
+            onClose={closePreview}
+            onDetails={(p) => globeApi?.highlight({ id: p.id, lat: p.lat, lon: p.lon, footprint: p.footprint })}
+          />
+        )}
 
         {!immersive && (
           <nav className="bottom-nav" aria-label="Sections">

@@ -8,6 +8,10 @@ export const GET = handle(async (req: Request) => {
   const found = await Promise.all(ids.map((id) => findPlace(id)));
   const places = found
     .filter((p) => p !== null)
-    .map(({ id, name, faith, tradition, city, country, lat, lon }) => ({ id, name, faith, tradition, city, country, lat, lon }));
+    .map(({ id, name, faith, tradition, city, country, cc, address, website, heritage, landmark, wikidata, wikipedia, lat, lon, footprint }) => ({
+      id, name, faith, tradition, city, country, cc, address, website, heritage, landmark, wikidata, wikipedia, lat, lon,
+      // Outlines only when asked for one place (they're big).
+      footprint: ids.length === 1 ? (footprint ?? null) : undefined,
+    }));
   return Response.json({ places }, { headers: { "Cache-Control": "public, max-age=300" } });
 });

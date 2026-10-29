@@ -45,6 +45,8 @@ export interface GlobeApi {
   flyIn(target: FlyTarget): Promise<void>;
   /** Rise back up to space above the current point. */
   flyOut(): Promise<void>;
+  /** Mark a place (pulse + glowing outline) without moving the camera; null clears it. */
+  highlight(target: FlyTarget | null): void;
   /** Pause animations while the immersive view covers the globe. */
   setPaused(paused: boolean): void;
   pov(): { lat: number; lng: number; zoom: number };
@@ -320,6 +322,10 @@ export default function GlobeMap(props: GlobeProps) {
         syncSelected(m, null);
         m.flyTo({ center: c, zoom: 2.4, pitch: 0, bearing: 0, duration: 2400, curve: 1.4, essential: true });
         await wait(m, 2400);
+      },
+      highlight: (target) => {
+        const m = mapRef.current;
+        if (m && readyRef.current) syncSelected(m, target);
       },
       setPaused: (p) => {
         paused.current = p;
