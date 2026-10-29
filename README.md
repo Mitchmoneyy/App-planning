@@ -169,7 +169,8 @@ TEST_DATABASE_URL=postgres://user:pass@localhost:5432/test_db npm test
    - `PLACES_PMTILES_URL`: the world tiles (see [pipeline/README.md](pipeline/README.md#hosting-the-tiles))
    - optional: `NEXT_PUBLIC_GOOGLE_MAPS_3D_KEY`, `ANTHROPIC_API_KEY`, push/email/Street View/Mapillary keys
 3. Deploy.
-4. Optional, for search across every place: load the places table (`npm run db:places`, see the pipeline README), and let the monthly GitHub Action keep it fresh.
+4. Optional, for search across every place: load the places table (`npm run db:places`, see the pipeline README), and let the GitHub Action keep it fresh.
+5. The places tiles: set `PLACES_PMTILES_URL` to `https://github.com/<you>/<repo>/releases/latest/download/places.pmtiles`. The "Places pipeline" GitHub Action builds and publishes them on its own (nightly until OpenStreetMap is fully downloaded, then monthly).
 
 ### Phone app
 

@@ -1,6 +1,13 @@
-# Rebuilds the world's places of worship once a month:
+# Rebuilds the world's places of worship:
 # Overture Maps + OpenStreetMap + approved user suggestions -> de-duplicated,
 # normalised -> vector tiles (PMTiles) -> published -> loaded into Postgres.
+#
+# Runs by itself. Every night it checks the latest published stats: while the
+# OpenStreetMap download isn't complete it runs again (each run continues
+# where the last stopped), and on the 2nd of each month it refreshes
+# everything. Once complete, nights in between are skipped in seconds.
+# The site reads .../releases/latest/download/places.pmtiles, which always
+# points at the newest build.
 #
 # Secrets (all optional):
 #   DATABASE_URL                      export approved suggestions, load the places table
@@ -11,7 +18,7 @@ name: Places pipeline
 
 on:
   schedule:
-    - cron: "17 3 2 * *" # 03:17 UTC on the 2nd of each month
+    - cron: "41 7 * * *" # every night, 07:41 UTC (decides below whether there's work to do)
   workflow_dispatch:
     inputs:
       osm:
@@ -22,8 +29,32 @@ on:
 permissions:
   contents: write
 
+# Never two builds at once (they share the download progress and the release).
+concurrency:
+  group: places-pipeline
+  cancel-in-progress: false
+
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - id: decide
+        name: Is there work to do?
+        run: |
+          run=false
+          reason="nothing to do: OpenStreetMap is complete and it isn't refresh day"
+          if [ "${{ github.event_name }}" != "schedule" ]; then run=true; reason="started by hand"; fi
+          if [ "$(date -u +%d)" = "02" ]; then run=true; reason="monthly refresh"; fi
+          complete=$(curl -sfL "https://github.com/${{ github.repository }}/releases/latest/download/stats.json" | jq -r '.osm.download.complete // false' 2>/dev/null || echo false)
+          if [ "$complete" != "true" ] && [ "$run" = "false" ]; then run=true; reason="OpenStreetMap download not complete yet"; fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "Run the pipeline: $run ($reason)" | tee -a "$GITHUB_STEP_SUMMARY"
+
   build:
+    needs: plan
+    if: ${{ needs.plan.outputs.run == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
@@ -96,7 +127,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="places-$(date -u +%Y-%m)"
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Places of worship $(date -u +%B\ %Y)" --notes-file pipeline/out/world/stats.json
+          # Each month gets its own release; the newest is "latest", which the site reads.
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --latest --title "Places of worship $(date -u +%B\ %Y)" --notes-file pipeline/out/world/stats.json
           gh release upload "$tag" pipeline/out/world/places.pmtiles pipeline/out/world/stats.json --clobber
 
       - name: Load the places table (search, near me)

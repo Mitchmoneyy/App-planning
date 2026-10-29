@@ -10,7 +10,18 @@ Building outlines ────┤                                               
 User suggestions ─────┘
 ```
 
-It runs monthly in GitHub Actions (`.github/workflows/places-pipeline.yml`) or by hand.
+It runs by itself in GitHub Actions (`.github/workflows/places-pipeline.yml`):
+every night it checks whether there's work to do. While the OpenStreetMap
+download is incomplete it runs again, continuing where the last run stopped;
+on the 2nd of each month it refreshes everything; otherwise it skips in seconds.
+Each build is published to a GitHub release, and
+`https://github.com/<you>/<repo>/releases/latest/download/places.pmtiles`
+always points at the newest one, so the site's `PLACES_PMTILES_URL` never changes.
+
+The OpenStreetMap download uses the free public Overpass servers
+(overpass-api.de, Kumi Systems, private.coffee), moving to the next when one
+is busy. Areas older than 40 days are fetched again, keeping the old copy
+until the new one arrives.
 
 ## Current numbers (October 2026 build)
 
@@ -55,7 +66,7 @@ about 15 GB of RAM for the world build, and 10 GB of free disk.
 # 1. Overture Maps places (about 10 minutes; reads only the worship rows)
 python pipeline/overture_places.py --release latest --out pipeline/in/overture
 
-# 2. OpenStreetMap via Overpass (2-5 hours; resumable; please run at most monthly)
+# 2. OpenStreetMap via Overpass (many hours in total; resumable; --max-minutes N to stop cleanly)
 node pipeline/osm_overpass.mjs --out pipeline/in/osm
 
 # 3. Building outlines for landmarks from Overture Buildings (optional)

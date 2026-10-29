@@ -3,14 +3,17 @@
  * outlines, through the Overpass API, in world tiles that split themselves
  * when a query is too large. Writes pipeline/in/osm/<tile>.ndjson.
  *
- *   node pipeline/osm_overpass.mjs --out pipeline/in/osm [--max-minutes 200] [--endpoint https://overpass-api.de/api/interpreter]
+ *   node pipeline/osm_overpass.mjs --out pipeline/in/osm [--max-minutes 200] [--max-age-days 40] [--endpoint URL[,URL…]]
  *
  * Each line: { type, id, lon, lat, tags, geometry? (GeoJSON polygon for ways/relations) }
  * Re-running skips finished tiles, so it can resume: with --max-minutes it stops
  * cleanly when time is up, and the next run (GitHub Actions caches the folder)
- * carries on where it left off. Please keep it to one run
- * a month: Overpass is a free, shared service. (For a planet-file route,
- * see pipeline/README.md: osmium tags-filter + osmium export.)
+ * carries on where it left off. Areas older than --max-age-days are fetched
+ * again, so the data stays fresh; the old copy is kept until the new one arrives.
+ *
+ * Overpass is a free, shared service: when one public server is busy we move
+ * on to the next, pause between requests, and never run two downloads at once.
+ * (For a planet-file route, see pipeline/README.md: osmium.)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -18,7 +21,14 @@ import path from "node:path";
 const argv = process.argv.slice(2);
 const opt = (k, d) => (argv.includes(`--${k}`) ? argv[argv.indexOf(`--${k}`) + 1] : d);
 const OUT = opt("out", "pipeline/in/osm");
-const ENDPOINT = opt("endpoint", "https://overpass-api.de/api/interpreter");
+// Public Overpass servers, tried in turn when one is busy.
+const ENDPOINTS = opt("endpoint", "")
+  ? opt("endpoint").split(",")
+  : ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
+let current = 0;
+const nextServer = () => (current = (current + 1) % ENDPOINTS.length);
+const MAX_AGE_MS = Number(opt("max-age-days", "40")) * 24 * 3600 * 1000;
+let gaveUp = 0;
 const DEADLINE = Date.now() + Number(opt("max-minutes", "100000")) * 60_000;
 let outOfTime = false;
 fs.mkdirSync(OUT, { recursive: true });
@@ -66,7 +76,8 @@ function toRow(el) {
 // A small report, kept across runs and copied into the published stats.json,
 // so a run can be checked without opening its logs.
 const REPORT = path.join(OUT, "_report.json");
-const report = fs.existsSync(REPORT) ? JSON.parse(fs.readFileSync(REPORT, "utf8")) : { tiles: 0, rows: 0, errors: {}, lastError: null };
+const report = { tiles: 0, rows: 0, errors: {}, lastError: null, split: [], ...(fs.existsSync(REPORT) ? JSON.parse(fs.readFileSync(REPORT, "utf8")) : {}) };
+report.split ??= [];
 const noteError = (kind, detail) => {
   report.errors[kind] = (report.errors[kind] ?? 0) + 1;
   report.lastError = `${kind}: ${String(detail).slice(0, 300)}`;
@@ -77,19 +88,22 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function fetchTile(bbox, depth = 0) {
   const name = bbox.map((v) => v.toFixed(2)).join("_");
   const file = path.join(OUT, `${name}.ndjson`);
-  if (fs.existsSync(file)) return;
-  for (let attempt = 0; attempt < 5; attempt++) {
+  if (fs.existsSync(file) && Date.now() - fs.statSync(file).mtimeMs < MAX_AGE_MS) return; // fresh enough
+  // Known to be too big for one request: go straight to its quarters.
+  if (report.split.includes(name) && depth < 7) return split(bbox, depth);
+  for (let attempt = 0; attempt < 6; attempt++) {
     if (Date.now() >= DEADLINE) {
       outOfTime = true;
       return;
     }
     let res, text;
     try {
-      res = await fetch(ENDPOINT, { method: "POST", body: new URLSearchParams({ data: query(bbox) }), headers: { "User-Agent": "GlobalSanctuary/1.0 (places pipeline)" } });
+      res = await fetch(ENDPOINTS[current], { method: "POST", body: new URLSearchParams({ data: query(bbox) }), headers: { "User-Agent": "GlobalSanctuary/1.0 (places pipeline)" } });
       text = await res.text();
     } catch (err) {
       noteError("network", err);
-      await sleep(20_000 * (attempt + 1));
+      nextServer();
+      await sleep(10_000 * (attempt + 1));
       continue;
     }
     if (res.status === 400) {
@@ -98,9 +112,10 @@ async function fetchTile(bbox, depth = 0) {
       saveReport();
       throw new Error(`Overpass rejected the query: ${text.slice(0, 500)}`);
     }
-    if (res.status === 429 || res.status === 503 || res.status === 504) {
-      noteError(`busy-${res.status}`, text.slice(0, 120));
-      await sleep(30_000 * (attempt + 1)); // server busy: wait, then try the same area again
+    if (res.status === 429 || res.status === 502 || res.status === 503 || res.status === 504) {
+      noteError(`busy-${res.status}`, `${ENDPOINTS[current]} ${text.slice(0, 120)}`);
+      nextServer(); // this server is busy: try the next one
+      await sleep(attempt < ENDPOINTS.length ? 5_000 : 30_000 * (attempt + 1));
       continue;
     }
     const tooBig = text.includes('"remark": "runtime error') || text.includes("runtime error: Query timed out") || text.includes("out of memory");
@@ -116,11 +131,14 @@ async function fetchTile(bbox, depth = 0) {
     }
     if (tooBig && depth < 7) {
       noteError("too-big-split", name);
+      if (!report.split.includes(name)) report.split.push(name);
+      saveReport();
       return split(bbox, depth);
     }
     noteError(`http-${res.status}`, text.slice(0, 200));
     await sleep(20_000 * (attempt + 1));
   }
+  gaveUp++;
   console.warn(name, "gave up for this run; it will be retried next run");
 }
 
@@ -131,6 +149,9 @@ async function split([s, w, n, e], depth) {
 
 // 10° x 10° world grid; dense areas split automatically.
 for (let s = -60; s < 80; s += 10) for (let w = -180; w < 180; w += 10) await fetchTile([s, w, s + 10, w + 10]);
+// Complete = every area of the world is downloaded and fresh.
+report.complete = !outOfTime && gaveUp === 0;
+if (report.complete) report.completedAt = new Date().toISOString();
 saveReport();
 const done = fs.readdirSync(OUT).filter((f) => f.endsWith(".ndjson")).length;
 console.log("report:", JSON.stringify(report));
