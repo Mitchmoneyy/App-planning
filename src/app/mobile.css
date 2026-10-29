@@ -396,3 +396,14 @@
     justify-content: center;
   }
 }
+
+/* Inside the phone app: the app's native tab bar replaces ours. */
+:root.in-app .bottom-nav {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  :root.in-app {
+    --nav-h: env(safe-area-inset-bottom);
+  }
+}

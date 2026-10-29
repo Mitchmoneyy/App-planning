@@ -15,10 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.globalsanctuary",
-      "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Global Sanctuary uses your location to centre the globe on where you are. It's rounded to your city and never shared exactly."
-      }
+      "bundleIdentifier": "app.globalsanctuary"
     },
     "android": {
       "package": "app.globalsanctuary",
@@ -28,15 +25,37 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [["expo-notifications", { "color": "#d9b26f" }]],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#d9b26f"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Global Sanctuary uses your location to show places of worship near you. It's never shared."
+        }
+      ],
+      "@rnmapbox/maps"
+    ],
     "extra": {
-      "siteUrl": "https://your-global-sanctuary.vercel.app"
+      "siteUrl": "https://your-global-sanctuary.vercel.app",
+      "mapboxToken": ""
+    },
+    "experiments": {
+      "typedRoutes": false
     }
   }
 }

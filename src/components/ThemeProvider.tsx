@@ -16,7 +16,8 @@ const STORAGE_KEY = "gs-theme";
  * Runs before the page paints (inlined in <head>) so there's no flash of the
  * wrong theme. Keep in sync with the logic below.
  */
-export const THEME_BOOT_SCRIPT = `(function(){try{var p=localStorage.getItem("${STORAGE_KEY}")||"system";var d=p==="dark"||(p==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}})()`;
+// Also marks pages shown inside the phone app ("in-app"), which has its own native tabs.
+export const THEME_BOOT_SCRIPT = `(function(){if(/GlobalSanctuaryApp/.test(navigator.userAgent))document.documentElement.classList.add("in-app")})();(function(){try{var p=localStorage.getItem("${STORAGE_KEY}")||"system";var d=p==="dark"||(p==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}})()`;
 
 interface ThemeContext {
   pref: ThemePref;

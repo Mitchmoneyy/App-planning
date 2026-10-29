@@ -174,17 +174,26 @@ TEST_DATABASE_URL=postgres://user:pass@localhost:5432/test_db npm test
 
 ### Phone app
 
-```bash
-cd mobile
-```
+The app (`mobile/`, Expo + Expo Router) has a **native globe** (Mapbox's phone SDK, with the
+website's own map style, places tiles and faith icons): tap any place for its card, tap a cluster
+to zoom in, search, and go to your location. "Arrive", "Pray for the world", "Your area" and "Me"
+show those screens of the website inside the app, with native tabs, push notifications and the
+back button.
 
-```bash
-npm install
-```
+Because the globe uses native code, it runs in your own build (not the Expo Go app). One-time setup:
 
-1. In `mobile/app.json`, set `expo.extra.siteUrl` to your deployed site (e.g. `https://your-app.vercel.app`).
-2. Try it on your phone with the free **Expo Go** app: run `npx expo start` and scan the QR code.
-3. For the stores and push notifications: create a free [Expo](https://expo.dev) account, then `npx eas-cli init` (adds the project id push needs), `npx eas-cli build --platform all`, and `npx eas-cli submit`.
+1. **Expo account** (free): `cd mobile`, `npm install`, `npx eas-cli login`, `npx eas-cli init`.
+2. **Mapbox tokens**, from [account.mapbox.com](https://account.mapbox.com/access-tokens):
+   - the public token: nothing to do, the app reads the website's `NEXT_PUBLIC_MAPBOX_TOKEN`
+     (or set `expo.extra.mapboxToken` in `mobile/app.json` to use a different one);
+   - a **secret** token with the `DOWNLOADS:READ` scope, used only while building: add it in the
+     Expo dashboard (Project → Environment variables) as `RNMAPBOX_MAPS_DOWNLOAD_TOKEN`, visibility "Secret".
+3. Set `expo.extra.siteUrl` in `mobile/app.json` to your site, e.g. `https://your-app.vercel.app`.
+4. **Try it:** `npx eas-cli build --profile preview --platform android` gives an install link for
+   Android phones. iPhones need an Apple Developer account ($99/year): `--platform ios`.
+5. **Stores:** `npx eas-cli build --profile production --platform all`, then `npx eas-cli submit`.
+
+The map icons are drawn by the website's code; after changing them, run `node scripts/build-mobile-icons.cjs`.
 
 ---
 
@@ -220,7 +229,7 @@ pipeline/                   Places pipeline (Overture, OpenStreetMap, footprints
 data/tiles/                 Sample places tiles (33k places)
 public/tiles, public/fonts  Offline NASA imagery tiles and map label fonts
 public/data/                Landmarks, cities, country shapes
-mobile/                     Expo iOS/Android app
+mobile/                     Expo iOS/Android app: native Mapbox globe + the website's screens
 tests/                      Tests (logic, moderation, gestures, faith normalisation, tiles, storage on both back ends)
 ```
 
