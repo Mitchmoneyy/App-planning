@@ -24,7 +24,7 @@ export default function FavoriteButton({ placeId, compact = false }: { placeId: 
           strokeLinejoin="round"
         />
       </svg>
-      {!compact && <span>{on ? "Saved" : "Save"}</span>}
+      {!compact && <span className="favorite-button__label">{on ? "Saved" : "Save"}</span>}
     </button>
   );
 }

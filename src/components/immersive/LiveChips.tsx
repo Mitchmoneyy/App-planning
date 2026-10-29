@@ -9,12 +9,19 @@ import type { Weather } from "@/server/weather";
 
 export default function LiveChips({ place }: { place: Place }) {
   const tz = useMemo(() => timeZoneAt(place.lat, place.lon), [place.lat, place.lon]);
-  const [now, setNow] = useState(() => new Date());
+  // The clock starts after the page loads: pages are pre-built, so a time
+  // rendered on the server would be the build time.
+  const [now, setNow] = useState<Date | null>(null);
   const [weather, setWeather] = useState<Weather | null>(null);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 20_000);
-    return () => clearInterval(t);
+    const tick = () => setNow(new Date());
+    const first = setTimeout(tick, 0);
+    const t = setInterval(tick, 20_000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+    };
   }, []);
 
   useEffect(() => {
@@ -27,8 +34,8 @@ export default function LiveChips({ place }: { place: Place }) {
     };
   }, [place.id]);
 
-  const time = formatLocalTime(tz, now);
-  const part = partOfDay(tz, now);
+  const time = now ? formatLocalTime(tz, now) : null;
+  const part = now ? partOfDay(tz, now) : null;
 
   return (
     <div className="live-chips">

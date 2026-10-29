@@ -3,6 +3,7 @@ import { MeProvider } from "@/components/MeProvider";
 import { THEME_BOOT_SCRIPT, ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import "./shell.css";
+import "./mobile.css";
 
 export const metadata: Metadata = {
   title: "Global Sanctuary",

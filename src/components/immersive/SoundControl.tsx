@@ -39,7 +39,7 @@ export default function SoundControl({ faith }: { faith: string }) {
             <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
           )}
         </svg>
-        {on ? AMBIENCE_LABELS[kind] : "Sound off"}
+        <span className="sound__label">{on ? AMBIENCE_LABELS[kind] : "Sound off"}</span>
       </button>
       {options.length > 1 && (
         <button type="button" className="glass-pill glass-pill--icon" onClick={() => setMenu((v) => !v)} aria-expanded={menu} aria-label="Choose sound">

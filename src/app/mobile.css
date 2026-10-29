@@ -1,0 +1,375 @@
+/*
+ * Phone layouts (also used by the iOS/Android app, which shows the website).
+ *
+ * - Top: brand + icons, then a full-width search row.
+ * - Bottom: a tab bar for the main sections (Globe, Pray for the world, Your area, Me).
+ * - Panels slide up from the bottom as sheets, leaving the globe visible above.
+ * - Place view: compact header, view switcher above a bottom sheet with the tabs.
+ */
+
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --nav-h: calc(62px + env(safe-area-inset-bottom));
+    --top-h: calc(116px + env(safe-area-inset-top));
+    --sheet-h: 58vh;
+    --sheet-bg: rgba(10, 13, 28, 0.95);
+  }
+
+  :root[data-theme="light"] {
+    --sheet-bg: rgba(251, 249, 244, 0.97);
+  }
+
+  :root[data-theme="light"] .immersive {
+    --sheet-bg: rgba(10, 13, 28, 0.95); /* the place view is always dark */
+  }
+
+  /* Solid backgrounds on small screens: busy maps behind text are hard to read. */
+  .topbar-d .search__results,
+  .welcome,
+  .side-panel,
+  .filters-pop .panel,
+  .immersive .ipanel {
+    background: var(--sheet-bg);
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar-d {
+    top: max(10px, env(safe-area-inset-top));
+    left: 12px;
+    right: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand nav"
+      "search search";
+    gap: 10px 8px;
+  }
+
+  .brand-d {
+    grid-area: brand;
+    font-size: 1.12rem;
+    align-self: center;
+  }
+
+  .topbar-d__nav {
+    grid-area: nav;
+    gap: 6px;
+  }
+
+  .topbar-d__nav .nav-section {
+    display: none; /* in the bottom tab bar instead */
+  }
+
+  .topbar-d__nav .icon-pill {
+    width: 40px;
+    height: 40px;
+  }
+
+  .topbar-d__search {
+    grid-area: search;
+    max-width: none;
+  }
+
+  .topbar-d .search__input {
+    height: 46px;
+    font-size: 16px; /* 16px stops iOS zooming into the field */
+  }
+
+  .topbar-d .search__results {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .search__result {
+    grid-template-columns: auto 1fr;
+  }
+
+  /* ---------- Bottom tab bar ---------- */
+  .bottom-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: var(--nav-h);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--glass-bg);
+    border-top: 1px solid var(--glass-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .bottom-nav a {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    color: var(--glass-muted);
+    text-decoration: none;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    text-align: center;
+    padding: 0 4px;
+  }
+
+  .bottom-nav a span {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .bottom-nav a.is-on {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---------- Things floating on the globe ---------- */
+  .toast {
+    top: calc(var(--top-h) + 6px);
+    left: 12px;
+    right: 12px;
+    transform: none;
+    font-size: 0.86rem;
+  }
+
+  .globe-tools {
+    right: 12px;
+    bottom: calc(var(--nav-h) + 96px);
+  }
+
+  .shell.has-panel .globe-tools {
+    display: none;
+  }
+
+  .live-count {
+    bottom: calc(var(--nav-h) + 12px);
+    max-width: calc(100vw - 120px);
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    white-space: normal;
+  }
+
+  .globe-credit {
+    display: none; /* the map's (i) button holds the credits */
+  }
+
+  /* Pinch to zoom on phones: keep the compass and scale, drop +/- buttons. */
+  .globe-canvas :is(.maplibregl-ctrl-zoom-in, .maplibregl-ctrl-zoom-out, .mapboxgl-ctrl-zoom-in, .mapboxgl-ctrl-zoom-out) {
+    display: none !important;
+  }
+
+  .globe-canvas :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) {
+    right: 8px;
+    bottom: calc(var(--nav-h) + 8px);
+  }
+
+  .globe-canvas :is(.maplibregl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-left) {
+    left: 8px;
+    bottom: calc(var(--nav-h) + 8px);
+  }
+
+  .shell.has-panel .globe-canvas {
+    right: 0;
+    transform: none;
+  }
+
+  .shell.has-panel .globe-canvas :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-left) {
+    display: none;
+  }
+
+  /* Welcome: a compact card above the tab bar */
+  .welcome {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: calc(var(--nav-h) + 12px);
+    padding: 16px 18px;
+    max-height: 46vh;
+    overflow-y: auto;
+  }
+
+  .welcome h2 {
+    font-size: 1.2rem;
+  }
+
+  .welcome li {
+    font-size: 0.9rem;
+  }
+
+  /* ---------- Bottom sheets: side panels and filters ---------- */
+  .side-panel,
+  .filters-pop {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: var(--nav-h);
+    width: auto;
+    height: var(--sheet-h);
+    transform: none;
+    border-radius: 22px 22px 0 0;
+    animation: sheet-up 0.32s ease-out;
+  }
+
+  .side-panel::before,
+  .filters-pop::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: var(--glass-border);
+    z-index: 1;
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+  }
+
+  .side-panel__head {
+    padding: 20px 18px 8px;
+  }
+
+  .side-panel__head h1 {
+    font-size: 1.35rem;
+  }
+
+  .side-panel__scroll {
+    padding: 4px 18px 18px;
+  }
+
+  .filters-pop .panel {
+    max-height: none;
+    height: 100%;
+    border-radius: 22px 22px 0 0;
+    overflow-y: auto;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* ---------- Arriving at a place ---------- */
+  .arriving {
+    bottom: 22vh;
+    width: calc(100vw - 32px);
+  }
+
+  .immersive__top {
+    top: max(10px, env(safe-area-inset-top));
+    left: 12px;
+    right: 12px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "back actions"
+      "title title";
+    gap: 10px;
+  }
+
+  .back-pill {
+    grid-area: back;
+    padding: 8px 14px;
+  }
+
+  .immersive__actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+
+  .immersive__actions .sound__label,
+  .immersive__actions .favorite-button__label {
+    display: none;
+  }
+
+  .immersive__title {
+    grid-area: title;
+  }
+
+  .immersive__title h1 {
+    font-size: 1.5rem;
+    max-width: none;
+  }
+
+  .immersive__where {
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+  }
+
+  .immersive__views {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    bottom: calc(var(--sheet-h) + 10px);
+  }
+
+  .view-switch {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .view-switch button {
+    white-space: nowrap;
+  }
+
+  .view-credit {
+    display: none;
+  }
+
+  .ipanel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: var(--sheet-h);
+    padding-bottom: env(safe-area-inset-bottom);
+    border-radius: 22px 22px 0 0;
+  }
+
+  .ipanel.is-collapsed {
+    top: auto;
+    bottom: 0;
+    height: auto;
+    width: auto;
+  }
+
+  .immersive:has(.ipanel.is-collapsed) .immersive__views {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+
+  .ipanel__tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ipanel__tabs button {
+    flex: 0 0 auto;
+    padding: 9px 12px;
+  }
+
+  .ipanel__collapse {
+    transform: rotate(90deg); /* ›/‹ point down/up on a bottom sheet */
+  }
+
+  .skip-flight {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+
+  /* ---------- Pages outside the globe (My sanctuary, About, …) ---------- */
+  .site-header__nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}

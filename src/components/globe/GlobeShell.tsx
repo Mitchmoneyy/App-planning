@@ -180,10 +180,10 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
             </div>
 
             <nav className="topbar-d__nav" aria-label="Main">
-              <Link href="/world" className={`pill pill--glow${pathname.startsWith("/world") ? " is-on" : ""}`}>
+              <Link href="/world" className={`pill pill--glow nav-section${pathname.startsWith("/world") ? " is-on" : ""}`}>
                 <span aria-hidden="true">✧</span> Pray for the world
               </Link>
-              <Link href="/area" className={`pill${pathname === "/area" ? " is-on" : ""}`}>
+              <Link href="/area" className={`pill nav-section${pathname === "/area" ? " is-on" : ""}`}>
                 Prayers for your area
               </Link>
               <ThemeToggle />
@@ -243,6 +243,27 @@ export default function GlobeShell({ children }: { children: React.ReactNode }) 
         )}
 
         {children}
+
+        {!immersive && (
+          <nav className="bottom-nav" aria-label="Sections">
+            <Link href="/" className={pathname === "/" ? "is-on" : ""}>
+              <span aria-hidden="true">◍</span>
+              Globe
+            </Link>
+            <Link href="/world" className={pathname.startsWith("/world") ? "is-on" : ""}>
+              <span aria-hidden="true">✧</span>
+              Pray for the world
+            </Link>
+            <Link href="/area" className={pathname === "/area" ? "is-on" : ""}>
+              <span aria-hidden="true">♡</span>
+              Your area
+            </Link>
+            <Link href="/me" className={pathname === "/me" ? "is-on" : ""}>
+              <span aria-hidden="true">☺</span>
+              Me
+            </Link>
+          </nav>
+        )}
 
         <p className="globe-credit">{CREDITS[mapProvider()]} · Places: OpenStreetMap, Overture Maps, Wikidata · Cities: GeoNames</p>
       </div>
